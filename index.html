@@ -8,45 +8,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
-        
-        body {
-            font-family: 'Inter', system_ui, sans-serif;
-        }
-        
-        .font-display {
-            font-family: 'Space Grotesk', 'Inter', sans-serif;
-            font-weight: 600;
-        }
-        
-        .risk-card {
-            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid #334155;
-        }
-        
-        .risk-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            border-color: #475569;
-        }
-        
-        .section {
-            scroll-margin-top: 80px;
-        }
-        
-        .modal-content {
-            animation: modalEnter 0.2s ease-out forwards;
-        }
-        
-        @keyframes modalEnter {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 600; }
+        .risk-card { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .risk-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200">
     <nav class="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+        <div class="max-w-screen-2xl mx-auto px-8 py-4 flex items-center justify-between">
             <div class="flex items-center gap-x-3">
                 <div class="w-9 h-9 bg-emerald-600 rounded-2xl flex items-center justify-center">
                     <i class="fa-solid fa-globe text-white text-2xl"></i>
@@ -54,37 +24,29 @@
                 <span class="font-display text-2xl font-semibold tracking-tighter">Earth Risk Watch</span>
             </div>
             
-            <div class="flex items-center gap-x-7 text-sm">
+            <div class="flex items-center gap-x-6 text-sm">
                 <a href="#dashboard" class="hover:text-white transition-colors">Dashboard</a>
                 <a href="#risks" class="hover:text-white transition-colors">Risk Matrix</a>
                 <a href="#cascading" class="hover:text-white transition-colors">Cascading Impacts</a>
                 <a href="#preparation" class="hover:text-white transition-colors">Preparation</a>
                 
-                <div class="flex items-center gap-x-3 pl-4 border-l border-slate-700">
-                    <button onclick="showLocationModal()" class="px-4 py-1.5 text-xs border border-slate-700 rounded-2xl hover:bg-slate-900 flex items-center gap-x-2 transition-colors">
-                        <i class="fa-solid fa-map-marker-alt"></i>
-                        <span>Location &amp; Alerts</span>
-                    </button>
-                    
-                    <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs border border-slate-700 rounded-2xl hover:bg-slate-900 flex items-center gap-x-2 transition-colors">
-                        <i class="fa-solid fa-adjust" id="theme-icon"></i>
-                    </button>
-                </div>
+                <button onclick="showLocationModal()" class="px-4 py-1.5 text-xs border border-slate-700 rounded-xl hover:bg-slate-900 flex items-center gap-x-2">
+                    <i class="fa-solid fa-map-marker-alt"></i>
+                    <span>Location &amp; Alerts</span>
+                </button>
+                
+                <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs border border-slate-700 rounded-xl hover:bg-slate-900 flex items-center gap-x-2">
+                    <i class="fa-solid fa-adjust" id="theme-icon"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-screen-2xl mx-auto px-8 pt-14 pb-10">
-        <div class="max-w-2xl">
-            <h1 class="font-display text-6xl leading-none tracking-tighter font-semibold mb-4">
-                Stay informed.<br>
-                <span class="text-emerald-400">Be prepared.</span>
-            </h1>
-            <p class="text-xl text-slate-400 max-w-md">Transparent monitoring of planetary risks with event history, trends, cross-references, and preparation guidance.</p>
-        </div>
+    <div class="max-w-screen-2xl mx-auto px-8 pt-12 pb-8">
+        <h1 class="font-display text-6xl leading-none tracking-tighter font-semibold mb-4">Stay informed.<br><span class="text-emerald-400">Be prepared.</span></h1>
     </div>
 
-    <div id="dashboard" class="max-w-screen-2xl mx-auto px-8 pb-12 section">
+    <div id="dashboard" class="max-w-screen-2xl mx-auto px-8 pb-10">
         <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-2xl">
             <div class="flex justify-between items-start mb-6">
                 <div>
@@ -100,7 +62,7 @@
         </div>
     </div>
 
-    <div id="risks" class="max-w-screen-2xl mx-auto px-8 pb-14 section">
+    <div id="risks" class="max-w-screen-2xl mx-auto px-8 pb-14">
         <div class="flex items-end justify-between mb-6">
             <div>
                 <div class="text-emerald-400 text-sm font-semibold tracking-[2px]">12-CATEGORY MATRIX</div>
@@ -116,22 +78,20 @@
         <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
 
-    <div id="cascading" class="max-w-screen-2xl mx-auto px-8 pb-16 section">
+    <div id="cascading" class="max-w-screen-2xl mx-auto px-8 pb-16">
         <div class="mb-6">
             <div class="text-emerald-400 text-sm font-semibold tracking-[2px]">SYSTEMIC VIEW</div>
             <div class="font-display text-4xl font-semibold tracking-tighter">Cascading Impacts &amp; Interconnections</div>
         </div>
         
         <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8">
-            <div class="text-sm text-slate-300 mb-6">Key relationships where one risk amplifies others, particularly Infrastructure &amp; Financial Strain.</div>
+            <div class="text-sm text-slate-300 mb-4">Key relationships where one risk amplifies others.</div>
             <div id="cascading-list" class="space-y-4"></div>
         </div>
     </div>
 
     <div id="modal" onclick="if (event.target.id === 'modal') hideModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
-        <div onclick="event.stopImmediatePropagation()" class="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-8 modal-content">
-            <div id="modalContent"></div>
-        </div>
+        <div onclick="event.stopImmediatePropagation()" class="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-8" id="modalContent"></div>
     </div>
 
     <div id="locationModal" onclick="if (event.target.id === 'locationModal') hideLocationModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
@@ -145,7 +105,7 @@
                 <label class="block text-sm mb-2">Your Location</label>
                 <div class="flex gap-x-2">
                     <input id="locationInput" type="text" placeholder="City or Region" class="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-4 py-2 text-sm">
-                    <button onclick="detectLocation()" class="px-4 py-2 text-sm border border-slate-700 rounded-2xl hover:bg-slate-800 transition-colors">Detect</button>
+                    <button onclick="detectLocation()" class="px-4 py-2 text-sm border border-slate-700 rounded-2xl hover:bg-slate-800">Detect</button>
                 </div>
                 <div id="currentLocation" class="text-xs text-emerald-400 mt-2"></div>
             </div>
@@ -158,7 +118,7 @@
             </div>
 
             <div class="flex gap-x-3">
-                <button onclick="saveLocationPreferences()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-sm font-semibold transition-colors">Save Preferences</button>
+                <button onclick="saveLocationPreferences()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-sm font-semibold">Save Preferences</button>
                 <button onclick="hideLocationModal()" class="flex-1 py-2.5 border border-slate-700 rounded-2xl text-sm">Cancel</button>
             </div>
         </div>
@@ -169,11 +129,16 @@
         let currentTheme = 'dark';
 
         async function loadData() {
-            const res = await fetch('risk-data.json');
-            riskData = await res.json();
-            renderAll();
-            renderCascading();
-            loadSavedPreferences();
+            try {
+                const res = await fetch('risk-data.json');
+                riskData = await res.json();
+                renderAll();
+                renderCascading();
+                loadSavedPreferences();
+            } catch (e) {
+                console.error('Failed to load data', e);
+                document.body.innerHTML = '<div class="p-8 text-red-400">Error loading risk data. Please refresh the page.</div>';
+            }
         }
 
         function renderAll() {
@@ -196,10 +161,12 @@
 
             const grid = document.getElementById('category-grid');
             grid.innerHTML = '';
+            
             riskData.categories.forEach((cat, index) => {
                 const color = cat.level === 'High' ? 'orange' : cat.level === 'Moderate' ? 'yellow' : 'emerald';
                 const div = document.createElement('div');
-                div.className = 'risk-card bg-slate-900 rounded-3xl p-6 cursor-pointer';
+                div.className = 'risk-card bg-slate-900 border border-slate-700 rounded-3xl p-6 cursor-pointer';
+                
                 div.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div class="font-semibold">${cat.name}</div>
@@ -208,6 +175,7 @@
                     <div class="mt-3 text-sm text-slate-300 line-clamp-3">${cat.metrics}</div>
                     <div class="mt-4 text-xs text-emerald-400">Click for details →</div>
                 `;
+                
                 div.onclick = () => showCategoryModal(index);
                 grid.appendChild(div);
             });
@@ -263,7 +231,7 @@
             }
             
             content.innerHTML = `
-                <div class="flex justify-between items-start mb-6">
+                <div class="flex justify-between mb-6">
                     <div>
                         <div class="font-display text-2xl font-semibold">${cat.name}</div>
                         <span class="risk-badge bg-yellow-500/20 text-yellow-400">${cat.level}</span>
@@ -273,45 +241,27 @@
                             <i class="fa-solid fa-volume-up"></i>
                             <span>Listen</span>
                         </button>
-                        <button onclick="hideModal()" class="text-3xl leading-none">&times;</button>
+                        <button onclick="hideModal()" class="text-3xl">&times;</button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <div class="mb-6">
-                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">KEY METRICS &amp; CONTEXT</div>
-                            <div class="text-sm">${cat.metrics}</div>
-                            <div class="mt-3 text-sm text-slate-300">${cat.cumulative_context || ''}</div>
-                        </div>
-
-                        <div>
-                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">RECENT EVENTS</div>
-                            <div class="text-sm">${eventsHTML || '<span class="text-slate-400">No major recent events recorded.</span>'}</div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="mb-6">
-                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">CROSS-REFERENCES</div>
-                            <div class="text-sm">${cat.cross_references ? cat.cross_references.map(r => `${r.category}: ${r.connection}`).join('<br>') : '<span class="text-slate-400">None</span>'}</div>
-                        </div>
-
-                        <div class="mb-6">
-                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">SOURCES &amp; DISCREPANCIES</div>
-                            <div class="text-sm">${cat.sources_compared}</div>
-                            <div class="mt-2 text-xs text-emerald-400">${cat.discrepancies}</div>
-                        </div>
-
-                        <div>
-                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">CONSERVATIVE READING</div>
-                            <div class="bg-slate-800 p-4 rounded-2xl text-sm">${cat.conservative_reading}</div>
-                        </div>
-                    </div>
+                <div class="mb-6">
+                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">KEY METRICS</div>
+                    <div class="text-sm">${cat.metrics}</div>
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-slate-700">
-                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">PREPARATION PRIORITY</div>
+                <div class="mb-6">
+                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">RECENT EVENTS</div>
+                    <div class="text-sm">${eventsHTML || 'No major recent events recorded.'}</div>
+                </div>
+
+                <div class="mb-6">
+                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">CROSS-REFERENCES</div>
+                    <div class="text-sm">${cat.cross_references ? cat.cross_references.map(r => `${r.category}: ${r.connection}`).join('<br>') : 'None'}</div>
+                </div>
+
+                <div>
+                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">PREPARATION</div>
                     <div class="text-sm">${cat.prep_priority}</div>
                 </div>
             `;
@@ -361,7 +311,7 @@
         function saveLocationPreferences() {
             const location = document.getElementById('locationInput').value.trim();
             const notify = document.getElementById('notifyToggle').checked;
-            localStorage.setItem('userPreferences', JSON.stringify({ location, notify }));
+            localStorage.setItem('userPreferences', JSON.stringify({ location: location, notify: notify }));
             alert('Preferences saved.');
             hideLocationModal();
         }
