@@ -46,6 +46,7 @@ body.reduce-motion .orb-spin{animation:none!important}
 <nav class="flex gap-1 text-sm hide-mobile">
 <a href="#matrix" class="px-2.5 py-1.5 rounded-lg muted hover:text-white">All risks</a>
 <a href="#space" class="px-2.5 py-1.5 rounded-lg muted hover:text-white">Space</a>
+<a href="#future" class="px-2.5 py-1.5 rounded-lg muted hover:text-white">Future</a>
 </nav>
 <div class="flex gap-1">
 <button type="button" class="a11y-btn" id="btn-tts" aria-pressed="false">TTS</button>
@@ -91,8 +92,15 @@ body.reduce-motion .orb-spin{animation:none!important}
 </div>
 <div class="panel rounded-3xl p-4 sm:p-5">
 <div class="flex justify-between mb-3"><h2 class="font-semibold text-sm">Scores</h2><span class="text-xs mono" style="color:#5b6b82">0–3</span></div>
-<div id="score-bars" class="space-y-2.5 max-h-[320px] overflow-y-auto"></div>
+<div id="score-bars" class="space-y-2.5"></div>
 </div>
+</section>
+<section id="future" class="panel rounded-3xl p-5 sm:p-6 mb-8">
+<div class="mb-3">
+<h2 class="font-semibold text-lg">What the cumulative picture means for the future</h2>
+<p class="text-sm mt-1" style="color:#8b9bb4">Scores capture today’s reading. Cumulative trends matter more for the next months and years. Open any row for the full category briefing.</p>
+</div>
+<div id="future-list" class="space-y-3"></div>
 </section>
 <section id="space" class="panel rounded-3xl p-4 sm:p-6 mb-8">
 <div class="mb-3 flex flex-wrap justify-between gap-2">
