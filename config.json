@@ -1,0 +1,12 @@
+{
+  "country_name": "Your country",
+  "country_code": "XX",
+  "site_title": "Earth Risk Watch",
+  "tagline": "Know what's going on. Know what to do.",
+  "language_note": "Official warnings always beat this website. Use your national weather and emergency services first.",
+  "official_links": [
+    {"label": "National weather service", "url": "https://example.org"},
+    {"label": "National emergency service", "url": "https://example.org"}
+  ],
+  "truth_seeking_mandate": "Prefer documented agency numbers and models that track observed data. When softer headlines lag harder official probabilities, say so in plain language."
+}
