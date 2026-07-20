@@ -1,1 +1,184 @@
-The full dynamic index.html content from the artifacts file
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earth Risk Watch • Transparent Global Risk Monitoring</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 600; }
+        .risk-card { transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0.0, 0.2, 1); }
+        .risk-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200">
+    <!-- Navbar -->
+    <nav class="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="w-9 h-9 bg-emerald-600 rounded-2xl flex items-center justify-center">
+                    <i class="fa-solid fa-globe text-white text-2xl"></i>
+                </div>
+                <span class="font-display text-2xl font-semibold tracking-tighter">Earth Risk Watch</span>
+            </div>
+            
+            <div class="flex items-center gap-x-8 text-sm">
+                <a href="#dashboard" class="hover:text-white transition-colors">Dashboard</a>
+                <a href="#risks" class="hover:text-white transition-colors">Risk Matrix</a>
+                <a href="#deep-dives" class="hover:text-white transition-colors">Deep Dives</a>
+                <a href="#preparation" class="hover:text-white transition-colors">Preparation</a>
+                <a href="#transparency" class="hover:text-white transition-colors">Transparency</a>
+            </div>
+            
+            <div class="flex items-center gap-x-3">
+                <div class="px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-3xl text-xs flex items-center gap-x-2">
+                    <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                    <span id="last-updated" class="text-emerald-400 text-xs font-medium">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="max-w-screen-2xl mx-auto px-8 pt-14 pb-10">
+        <div class="max-w-2xl">
+            <h1 class="font-display text-6xl leading-none tracking-tighter font-semibold mb-4">
+                Stay informed.<br>
+                <span class="text-emerald-400">Be prepared.</span>
+            </h1>
+            <p class="text-xl text-slate-400">Transparent, data-driven global risk monitoring with source discrepancies and practical preparation.</p>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="max-w-screen-2xl mx-auto px-8 pb-12">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Doomsday -->
+            <div class="lg:col-span-5 bg-slate-900 border border-slate-700 rounded-3xl p-8">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <div class="text-emerald-400 text-xs font-semibold tracking-[1.5px]">SYMBOLIC INDICATOR</div>
+                        <div class="font-display text-2xl font-semibold tracking-tight">Doomsday Clock</div>
+                    </div>
+                    <div id="doomsday-value" class="text-right"></div>
+                </div>
+                <div id="doomsday-gauge" class="my-4"></div>
+                <div id="doomsday-assessment" class="text-sm text-slate-300"></div>
+            </div>
+
+            <!-- Overall -->
+            <div class="lg:col-span-7 bg-slate-900 border border-slate-700 rounded-3xl p-8">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <div class="text-emerald-400 text-xs font-semibold tracking-widest">TODAY’S OVERVIEW</div>
+                        <div class="font-display text-3xl font-semibold tracking-tight">Planetary Risk Profile</div>
+                    </div>
+                    <div id="overall-risk-badge"></div>
+                </div>
+                <div id="overall-summary" class="text-slate-300 text-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Matrix -->
+    <div id="risks" class="max-w-screen-2xl mx-auto px-8 pb-16">
+        <div class="flex items-end justify-between mb-6">
+            <div>
+                <div class="text-emerald-400 text-sm font-semibold tracking-[2px]">10-CATEGORY MATRIX</div>
+                <div class="font-display text-4xl font-semibold tracking-tighter">Current Global Risk Matrix</div>
+            </div>
+        </div>
+        
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8">
+            <div class="font-semibold mb-4">Risk Profile Radar</div>
+            <canvas id="riskRadar" width="580" height="580"></canvas>
+        </div>
+        
+        <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"></div>
+    </div>
+
+    <script>
+        let riskData = null;
+
+        async function loadData() {
+            const res = await fetch('risk-data.json');
+            riskData = await res.json();
+            renderAll();
+        }
+
+        function renderAll() {
+            document.getElementById('last-updated').innerHTML = `Updated ${riskData.date}`;
+            
+            // Overall
+            document.getElementById('overall-summary').innerHTML = riskData.summary;
+            document.getElementById('overall-risk-badge').innerHTML = `<div class="text-2xl font-semibold">${riskData.overall_risk}</div>`;
+
+            // Doomsday
+            const clock = riskData.doomsday_clock;
+            document.getElementById('doomsday-value').innerHTML = `
+                <div class="text-6xl font-semibold tabular-nums text-red-400">${clock.seconds_to_midnight}</div>
+                <div class="text-xs text-slate-400">SECONDS TO MIDNIGHT</div>`;
+            document.getElementById('doomsday-assessment').innerHTML = clock.assessment;
+
+            // Simple SVG Gauge
+            const gauge = document.getElementById('doomsday-gauge');
+            const pct = (clock.seconds_to_midnight / 120) * 180 - 90;
+            gauge.innerHTML = `<svg width="220" height="220" viewBox="0 0 220 220">
+                <path d="M 30 170 A 80 80 0 1 1 190 170" fill="none" stroke="#334155" stroke-width="18"/>
+                <g transform="rotate(${pct} 110 110)">
+                    <line x1="110" y1="110" x2="110" y2="45" stroke="#ef4444" stroke-width="5"/>
+                    <circle cx="110" cy="110" r="7" fill="#ef4444"/>
+                </g>
+            </svg>`;
+
+            // Render cards
+            renderCategoryCards();
+            renderRadar();
+        }
+
+        function renderCategoryCards() {
+            const container = document.getElementById('category-grid');
+            container.innerHTML = '';
+            riskData.categories.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = 'risk-card bg-slate-900 border border-slate-700 rounded-3xl p-6 cursor-pointer';
+                div.innerHTML = `
+                    <div class="font-semibold">${cat.name}</div>
+                    <div class="text-xs text-slate-400 mt-1">${cat.metrics.substring(0,80)}...</div>
+                    <div class="mt-4 flex justify-between">
+                        <span class="font-mono text-xl">${cat.score}/3</span>
+                        <span class="risk-badge bg-yellow-500/20 text-yellow-400">${cat.level}</span>
+                    </div>`;
+                div.onclick = () => showModal(cat);
+                container.appendChild(div);
+            });
+        }
+
+        function renderRadar() {
+            const ctx = document.getElementById('riskRadar');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: riskData.categories.map(c => c.name),
+                    datasets: [{
+                        data: riskData.categories.map(c => c.score),
+                        backgroundColor: 'rgba(16,185,129,0.15)',
+                        borderColor: '#10b981',
+                        borderWidth: 2
+                    }]
+                },
+                options: { scales: { r: { max: 3 } }, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function showModal(cat) {
+            alert(`${cat.name}\n\nLevel: ${cat.level}\nScore: ${cat.score}\n\nMetrics: ${cat.metrics}\n\nSources: ${cat.sources_compared}\n\nDiscrepancies: ${cat.discrepancies}\n\nConservative: ${cat.conservative_reading}`);
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
