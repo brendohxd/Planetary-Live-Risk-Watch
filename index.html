@@ -10,8 +10,6 @@
     <style>
         body { font-family: 'Inter', system_ui, sans-serif; }
         .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 600; }
-        .risk-card { transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0.0, 0.2, 1); }
-        .risk-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200">
@@ -23,120 +21,66 @@
                 </div>
                 <span class="font-display text-2xl font-semibold tracking-tighter">Earth Risk Watch</span>
             </div>
-            <div class="flex items-center gap-x-8 text-sm">
-                <a href="#dashboard" class="hover:text-white transition-colors">Dashboard</a>
-                <a href="#risks" class="hover:text-white transition-colors">Risk Matrix</a>
-                <a href="#deep-dives" class="hover:text-white transition-colors">Deep Dives</a>
-                <a href="#preparation" class="hover:text-white transition-colors">Preparation</a>
-                <a href="#transparency" class="hover:text-white transition-colors">Transparency</a>
-            </div>
         </div>
     </nav>
 
-    <div class="max-w-screen-2xl mx-auto px-8 pt-14 pb-10">
-        <div class="max-w-2xl">
-            <h1 class="font-display text-6xl leading-none tracking-tighter font-semibold mb-4">
-                Stay informed.<br>
-                <span class="text-emerald-400">Be prepared.</span>
-            </h1>
-            <p class="text-xl text-slate-400">Transparent, data-driven global risk monitoring with source discrepancies and practical preparation.</p>
-        </div>
+    <div class="max-w-screen-2xl mx-auto px-8 pt-10 pb-8">
+        <h1 class="font-display text-5xl font-semibold tracking-tighter mb-2">Earth Risk Watch</h1>
+        <p class="text-slate-400">Transparent, data-driven global risk monitoring</p>
     </div>
 
-    <div id="dashboard" class="max-w-screen-2xl mx-auto px-8 pb-12">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div class="lg:col-span-5 bg-slate-900 border border-slate-700 rounded-3xl p-8">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <div class="text-emerald-400 text-xs font-semibold tracking-[1.5px]">SYMBOLIC INDICATOR</div>
-                        <div class="font-display text-2xl font-semibold tracking-tight">Doomsday Clock</div>
-                    </div>
-                    <div id="doomsday-value" class="text-right"></div>
+    <div class="max-w-screen-2xl mx-auto px-8">
+        <!-- Doomsday -->
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8 max-w-md">
+            <div class="flex justify-between">
+                <div>
+                    <div class="text-emerald-400 text-xs font-semibold tracking-widest">DOOMSDAY CLOCK</div>
+                    <div id="doomsday-value" class="text-6xl font-semibold text-red-400 mt-1"></div>
                 </div>
-                <div id="doomsday-gauge" class="my-4"></div>
-                <div id="doomsday-assessment" class="text-sm text-slate-300"></div>
             </div>
+            <div id="doomsday-assessment" class="text-sm text-slate-300 mt-3"></div>
+        </div>
 
-            <div class="lg:col-span-7 bg-slate-900 border border-slate-700 rounded-3xl p-8">
-                <div class="flex items-center justify-between mb-5">
-                    <div>
-                        <div class="text-emerald-400 text-xs font-semibold tracking-widest">TODAY’S OVERVIEW</div>
-                        <div class="font-display text-3xl font-semibold tracking-tight">Planetary Risk Profile</div>
-                    </div>
-                    <div id="overall-risk-badge"></div>
-                </div>
-                <div id="overall-summary" class="text-slate-300 text-sm"></div>
-            </div>
+        <!-- Main Bar Chart -->
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8">
+            <div class="font-semibold mb-4 text-xl">Risk Scores by Category</div>
+            <canvas id="riskBar" height="380"></canvas>
         </div>
-    </div>
 
-    <div id="risks" class="max-w-screen-2xl mx-auto px-8 pb-16">
-        <div class="flex items-end justify-between mb-6">
-            <div>
-                <div class="text-emerald-400 text-sm font-semibold tracking-[2px]">10-CATEGORY MATRIX</div>
-                <div class="font-display text-4xl font-semibold tracking-tighter">Current Global Risk Matrix</div>
-            </div>
-        </div>
-        
-        <!-- Primary: Horizontal Bar Chart (easiest to read) -->
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8">
-            <div class="font-semibold mb-4">Risk Scores by Category</div>
-            <canvas id="riskBar" height="320"></canvas>
-        </div>
-        
-        <!-- Secondary: Cleaner Radar -->
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8">
-            <div class="font-semibold mb-4">Overall Risk Profile (Radar)</div>
-            <canvas id="riskRadar" width="520" height="520"></canvas>
-        </div>
-        
-        <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"></div>
+        <!-- Category Cards -->
+        <div class="mb-4 font-semibold text-xl">Category Details</div>
+        <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
 
     <script>
-        let riskData = null;
-
         async function loadData() {
-            const res = await fetch('risk-data.json');
-            riskData = await res.json();
-            renderAll();
+            try {
+                const res = await fetch('risk-data.json');
+                const data = await res.json();
+                renderAll(data);
+            } catch (e) {
+                console.error('Failed to load data', e);
+                document.body.innerHTML = '<div class="p-8 text-red-400">Error loading risk data. Please refresh.</div>';
+            }
         }
 
-        function renderAll() {
-            document.getElementById('last-updated').innerHTML = `Updated ${riskData.date}`;
-            document.getElementById('overall-summary').innerHTML = riskData.summary;
-            document.getElementById('overall-risk-badge').innerHTML = `<div class="text-2xl font-semibold">${riskData.overall_risk}</div>`;
-
+        function renderAll(data) {
             // Doomsday
-            const clock = riskData.doomsday_clock;
-            document.getElementById('doomsday-value').innerHTML = `<div class="text-6xl font-semibold tabular-nums text-red-400">${clock.seconds_to_midnight}</div><div class="text-xs text-slate-400">SECONDS TO MIDNIGHT</div>`;
+            const clock = data.doomsday_clock;
+            document.getElementById('doomsday-value').innerHTML = clock.seconds_to_midnight + '<span class="text-xl align-super">s</span>';
             document.getElementById('doomsday-assessment').innerHTML = clock.assessment;
 
-            const gauge = document.getElementById('doomsday-gauge');
-            const pct = (clock.seconds_to_midnight / 120) * 180 - 90;
-            gauge.innerHTML = `<svg width="220" height="220" viewBox="0 0 220 220"><path d="M 30 170 A 80 80 0 1 1 190 170" fill="none" stroke="#334155" stroke-width="18"/><g transform="rotate(${pct} 110 110)"><line x1="110" y1="110" x2="110" y2="45" stroke="#ef4444" stroke-width="5"/><circle cx="110" cy="110" r="7" fill="#ef4444"/></g></svg>`;
-
-            renderBarChart();
-            renderRadar();
-            renderCategoryCards();
-        }
-
-        function renderBarChart() {
+            // Bar Chart
             const ctx = document.getElementById('riskBar');
-            const labels = riskData.categories.map(c => c.name);
-            const scores = riskData.categories.map(c => c.score);
-            const colors = riskData.categories.map(c => {
-                if (c.level === 'High') return '#f59e0b';
-                if (c.level === 'Moderate') return '#eab308';
-                return '#10b981';
-            });
+            const labels = data.categories.map(c => c.name);
+            const scores = data.categories.map(c => c.score);
+            const colors = data.categories.map(c => c.level === 'High' ? '#f59e0b' : c.level === 'Moderate' ? '#eab308' : '#10b981');
 
             new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Risk Score (0-3)',
                         data: scores,
                         backgroundColor: colors,
                         borderWidth: 0
@@ -145,62 +89,28 @@
                 options: {
                     indexAxis: 'y',
                     responsive: true,
-                    scales: {
-                        x: { max: 3, ticks: { stepSize: 1 } }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => `${ctx.raw}/3 - ${riskData.categories[ctx.dataIndex].level}`
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderRadar() {
-            const ctx = document.getElementById('riskRadar');
-            new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: riskData.categories.map(c => c.name),
-                    datasets: [{
-                        data: riskData.categories.map(c => c.score),
-                        backgroundColor: 'rgba(16,185,129,0.12)',
-                        borderColor: '#10b981',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    scales: { r: { max: 3 } },
+                    scales: { x: { max: 3, ticks: { stepSize: 1 } } },
                     plugins: { legend: { display: false } }
                 }
             });
-        }
 
-        function renderCategoryCards() {
-            const container = document.getElementById('category-grid');
-            container.innerHTML = '';
-            riskData.categories.forEach(cat => {
-                const div = document.createElement('div');
-                div.className = 'risk-card bg-slate-900 border border-slate-700 rounded-3xl p-6 cursor-pointer';
+            // Category Cards
+            const grid = document.getElementById('category-grid');
+            grid.innerHTML = '';
+            data.categories.forEach(cat => {
                 const color = cat.level === 'High' ? 'orange' : cat.level === 'Moderate' ? 'yellow' : 'emerald';
+                const div = document.createElement('div');
+                div.className = 'bg-slate-900 border border-slate-700 rounded-3xl p-6';
                 div.innerHTML = `
-                    <div class="font-semibold">${cat.name}</div>
-                    <div class="text-xs text-slate-400 mt-1 line-clamp-2">${cat.metrics}</div>
-                    <div class="mt-4 flex justify-between items-center">
-                        <span class="font-mono text-xl">${cat.score}/3</span>
+                    <div class="flex justify-between">
+                        <div class="font-semibold">${cat.name}</div>
                         <span class="risk-badge bg-${color}-500/20 text-${color}-400">${cat.level}</span>
-                    </div>`;
-                div.onclick = () => showModal(cat);
-                container.appendChild(div);
+                    </div>
+                    <div class="mt-3 text-sm text-slate-300">${cat.metrics}</div>
+                    <div class="mt-4 text-xs text-slate-400">Score: <span class="font-mono text-white">${cat.score}/3</span></div>
+                `;
+                grid.appendChild(div);
             });
-        }
-
-        function showModal(cat) {
-            alert(`${cat.name}\n\nLevel: ${cat.level} (${cat.score}/3)\n\n${cat.metrics}\n\nSources: ${cat.sources_compared}\n\nDiscrepancies: ${cat.discrepancies}\n\nConservative view: ${cat.conservative_reading}`);
         }
 
         window.onload = loadData;
