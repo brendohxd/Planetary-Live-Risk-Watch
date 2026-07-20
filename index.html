@@ -26,22 +26,27 @@
         }
         
         .risk-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
             border-color: #475569;
         }
         
-        .premium-shadow {
+        .premium-card {
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
         
-        .section-header {
-            font-size: 1.35rem;
-            letter-spacing: -0.03em;
+        .modal {
+            animation: modalPop 0.2s ease-out;
+        }
+        
+        @keyframes modalPop {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200">
+    <!-- Navbar -->
     <nav class="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-50">
         <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
             <div class="flex items-center gap-x-3">
@@ -71,11 +76,12 @@
         </div>
     </nav>
 
-    <div class="max-w-screen-2xl mx-auto px-8 pt-16 pb-12">
+    <!-- Hero -->
+    <div class="max-w-screen-2xl mx-auto px-8 pt-14 pb-10">
         <div class="max-w-2xl">
-            <div class="inline-flex items-center px-4 py-1.5 bg-slate-900 border border-slate-700 rounded-3xl mb-6 text-sm">
+            <div class="inline-flex items-center gap-x-2 px-4 py-1.5 bg-slate-900 border border-slate-700 rounded-3xl mb-6 text-sm">
                 <span class="text-emerald-400">●</span>
-                <span class="ml-2 font-medium">Transparent • Data-driven • Preparation-focused</span>
+                <span class="ml-2 font-medium">Transparent • Multi-source • Preparation-focused</span>
             </div>
             
             <h1 class="font-display text-6xl leading-none tracking-tighter font-semibold mb-4">
@@ -83,12 +89,15 @@
                 <span class="text-emerald-400">Be prepared.</span>
             </h1>
             
-            <p class="text-xl text-slate-400 max-w-md">Clear, evidence-based monitoring of planetary risks with event history, trends, and cross-references.</p>
+            <p class="text-xl text-slate-400 max-w-md">
+                Clear, evidence-based monitoring of planetary risks with event history, trends, and cross-references.
+            </p>
         </div>
     </div>
 
-    <div id="dashboard" class="max-w-screen-2xl mx-auto px-8 pb-14">
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-2xl premium-shadow">
+    <!-- Doomsday Clock -->
+    <div id="dashboard" class="max-w-screen-2xl mx-auto px-8 pb-12">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-2xl premium-card">
             <div class="flex justify-between items-start mb-6">
                 <div>
                     <div class="text-emerald-400 text-xs font-semibold tracking-[1.5px]">SYMBOLIC INDICATOR</div>
@@ -96,14 +105,17 @@
                 </div>
                 <div id="doomsday-value" class="text-right text-6xl font-semibold tabular-nums text-red-400"></div>
             </div>
+            
             <div class="text-sm text-slate-300 mb-4" id="doomsday-assessment"></div>
+            
             <div class="text-xs text-slate-400 bg-slate-800 p-3 rounded-2xl">
                 <strong>Nuclear risks</strong> remain one of the primary reasons the Clock sits at 85 seconds.
             </div>
         </div>
     </div>
 
-    <div id="risks" class="max-w-screen-2xl mx-auto px-8 pb-16">
+    <!-- Risk Matrix -->
+    <div id="risks" class="max-w-screen-2xl mx-auto px-8 pb-14">
         <div class="flex items-end justify-between mb-6">
             <div>
                 <div class="text-emerald-400 text-sm font-semibold tracking-[2px]">12-CATEGORY MATRIX</div>
@@ -111,7 +123,7 @@
             </div>
         </div>
         
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8 premium-shadow">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8 premium-card">
             <div class="font-semibold mb-4">Risk Scores by Category</div>
             <canvas id="riskBar" height="380"></canvas>
         </div>
@@ -119,20 +131,22 @@
         <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
 
+    <!-- Cascading Impacts -->
     <div id="cascading" class="max-w-screen-2xl mx-auto px-8 pb-16">
         <div class="mb-6">
             <div class="text-emerald-400 text-sm font-semibold tracking-[2px]">SYSTEMIC VIEW</div>
             <div class="font-display text-4xl font-semibold tracking-tighter">Cascading Impacts &amp; Interconnections</div>
         </div>
         
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 premium-shadow">
-            <div class="text-sm text-slate-300 mb-6">Key relationships where one risk amplifies others, especially Infrastructure &amp; Financial Strain.</div>
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 premium-card">
+            <div class="text-sm text-slate-300 mb-6">Key relationships where one risk amplifies others (especially Infrastructure &amp; Financial Strain).</div>
             <div id="cascading-list" class="space-y-4"></div>
         </div>
     </div>
 
+    <!-- Modals -->
     <div id="modal" onclick="if (event.target.id === 'modal') hideModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
-        <div onclick="event.stopImmediatePropagation()" class="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-8" id="modalContent"></div>
+        <div onclick="event.stopImmediatePropagation()" class="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-8 modal" id="modalContent"></div>
     </div>
 
     <div id="locationModal" onclick="if (event.target.id === 'locationModal') hideLocationModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
@@ -146,7 +160,7 @@
                 <label class="block text-sm mb-2">Your Location</label>
                 <div class="flex gap-x-2">
                     <input id="locationInput" type="text" placeholder="City or Region" class="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-4 py-2 text-sm">
-                    <button onclick="detectLocation()" class="px-4 py-2 text-sm border border-slate-700 rounded-2xl hover:bg-slate-800">Detect</button>
+                    <button onclick="detectLocation()" class="px-4 py-2 text-sm border border-slate-700 rounded-2xl hover:bg-slate-800 transition-colors">Detect</button>
                 </div>
                 <div id="currentLocation" class="text-xs text-emerald-400 mt-2"></div>
             </div>
@@ -159,7 +173,7 @@
             </div>
 
             <div class="flex gap-x-3">
-                <button onclick="saveLocationPreferences()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-sm font-semibold">Save Preferences</button>
+                <button onclick="saveLocationPreferences()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-sm font-semibold transition-colors">Save Preferences</button>
                 <button onclick="hideLocationModal()" class="flex-1 py-2.5 border border-slate-700 rounded-2xl text-sm">Cancel</button>
             </div>
         </div>
@@ -170,11 +184,16 @@
         let currentTheme = 'dark';
 
         async function loadData() {
-            const res = await fetch('risk-data.json');
-            riskData = await res.json();
-            renderAll();
-            renderCascading();
-            loadSavedPreferences();
+            try {
+                const res = await fetch('risk-data.json');
+                riskData = await res.json();
+                renderAll();
+                renderCascading();
+                loadSavedPreferences();
+            } catch (e) {
+                console.error(e);
+                document.body.innerHTML = '<div class="p-8 text-red-400">Error loading data. Please refresh.</div>';
+            }
         }
 
         function renderAll() {
@@ -197,6 +216,7 @@
 
             const grid = document.getElementById('category-grid');
             grid.innerHTML = '';
+            
             riskData.categories.forEach((cat, index) => {
                 const color = cat.level === 'High' ? 'orange' : cat.level === 'Moderate' ? 'yellow' : 'emerald';
                 const div = document.createElement('div');
