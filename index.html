@@ -3,94 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earth Risk Watch • Transparent Global Risk Monitoring</title>
+    <title>Earth Risk Watch</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Inter', system_ui, sans-serif; }
-        .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 600; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+        
+        :root {
+            --accent: #10b981;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .font-display {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            font-weight: 600;
+        }
+        
+        .risk-card {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .risk-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        
+        .section-header {
+            font-size: 1.5rem;
+            line-height: 1.1;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+        
+        .modal {
+            animation: modalPop 0.2s ease-out;
+        }
+        
+        @keyframes modalPop {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200">
+    <!-- Navbar -->
     <nav class="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+        <div class="max-w-screen-2xl mx-auto px-8 py-4 flex items-center justify-between">
             <div class="flex items-center gap-x-3">
                 <div class="w-9 h-9 bg-emerald-600 rounded-2xl flex items-center justify-center">
                     <i class="fa-solid fa-globe text-white text-2xl"></i>
                 </div>
                 <span class="font-display text-2xl font-semibold tracking-tighter">Earth Risk Watch</span>
             </div>
+            
+            <div class="flex items-center gap-x-6 text-sm">
+                <a href="#dashboard" class="hover:text-white transition-colors">Dashboard</a>
+                <a href="#risks" class="hover:text-white transition-colors">Risk Matrix</a>
+                <a href="#deep-dives" class="hover:text-white transition-colors">Deep Dives</a>
+                <a href="#preparation" class="hover:text-white transition-colors">Preparation</a>
+                
+                <div class="flex items-center gap-x-2 ml-4 pl-4 border-l border-slate-700">
+                    <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs border border-slate-700 rounded-xl hover:bg-slate-900 transition-colors flex items-center gap-x-2">
+                        <i class="fa-solid fa-moon" id="theme-icon"></i>
+                        <span id="theme-text">Dark</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div class="max-w-screen-2xl mx-auto px-8 pt-10 pb-8">
-        <h1 class="font-display text-5xl font-semibold tracking-tighter mb-2">Earth Risk Watch</h1>
-        <p class="text-slate-400">Transparent, data-driven global risk monitoring</p>
+    <!-- Hero -->
+    <div class="max-w-screen-2xl mx-auto px-8 pt-12 pb-8">
+        <div class="max-w-2xl">
+            <div class="inline-flex items-center gap-x-2 px-4 py-1.5 bg-slate-900 border border-slate-700 rounded-3xl mb-6 text-sm">
+                <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                <span class="font-medium">Transparent • Multi-source • Preparation-focused</span>
+            </div>
+            
+            <h1 class="font-display text-6xl leading-none tracking-tighter font-semibold mb-4">
+                Stay informed.<br>
+                <span class="text-emerald-400">Be prepared.</span>
+            </h1>
+            
+            <p class="text-xl text-slate-400 max-w-lg">
+                Clear, evidence-based monitoring of planetary risks. No sensationalism. Just the data, discrepancies, trends, and practical steps.
+            </p>
+        </div>
     </div>
 
-    <div class="max-w-screen-2xl mx-auto px-8">
-        <!-- Doomsday Clock Visual -->
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8 max-w-lg mx-auto">
-            <div class="text-center mb-4">
-                <div class="text-emerald-400 text-xs font-semibold tracking-[2px]">SYMBOLIC INDICATOR</div>
-                <div class="font-display text-3xl font-semibold tracking-tight mt-1">Doomsday Clock</div>
+    <!-- Doomsday Clock -->
+    <div id="dashboard" class="max-w-screen-2xl mx-auto px-8 pb-10">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-2xl">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <div class="text-emerald-400 text-xs font-semibold tracking-[1.5px]">SYMBOLIC INDICATOR</div>
+                    <div class="font-display text-3xl font-semibold tracking-tight">Doomsday Clock</div>
+                </div>
+                <div id="doomsday-value" class="text-right text-6xl font-semibold tabular-nums text-red-400"></div>
             </div>
-
-            <!-- Visual Clock -->
-            <div class="flex justify-center my-6">
-                <svg id="doomsday-clock" width="280" height="280" viewBox="0 0 280 280">
-                    <!-- Clock face -->
-                    <circle cx="140" cy="140" r="120" fill="none" stroke="#334155" stroke-width="12"/>
-                    
-                    <!-- Hour marks -->
-                    <g stroke="#64748b" stroke-width="4">
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(0 140 140)"/>
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(30 140 140)"/>
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(60 140 140)"/>
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(90 140 140)"/>
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(120 140 140)"/>
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(150 140 140)"/>
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(180 140 140)"/>
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(210 140 140)"/>
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(240 140 140)"/>
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(270 140 140)"/>
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(300 140 140)"/>
-                        <line x1="140" y1="30" x2="140" y2="50" transform="rotate(330 140 140)"/>
-                    </g>
-                    
-                    <!-- Midnight label -->
-                    <text x="140" y="55" fill="#ef4444" font-size="14" font-weight="600" text-anchor="middle">MIDNIGHT</text>
-                    
-                    <!-- Hand (will be rotated by JS) -->
-                    <g id="clock-hand">
-                        <line x1="140" y1="140" x2="140" y2="55" stroke="#ef4444" stroke-width="6" stroke-linecap="round"/>
-                        <circle cx="140" cy="140" r="8" fill="#ef4444"/>
-                    </g>
-                </svg>
+            
+            <div class="text-sm text-slate-300 mb-4" id="doomsday-assessment"></div>
+            
+            <div class="text-xs text-slate-400 bg-slate-800 p-3 rounded-2xl">
+                <strong>Nuclear risks</strong> remain one of the primary reasons the Clock sits at 85 seconds, alongside climate change and disruptive technologies.
             </div>
-
-            <div class="text-center">
-                <div id="doomsday-value" class="text-7xl font-semibold tabular-nums text-red-400"></div>
-                <div class="text-sm text-slate-400 -mt-1">SECONDS TO MIDNIGHT</div>
-            </div>
-
-            <div id="doomsday-assessment" class="text-sm text-slate-300 mt-4 text-center"></div>
         </div>
+    </div>
 
-        <!-- Bar Chart -->
+    <!-- Risk Matrix -->
+    <div id="risks" class="max-w-screen-2xl mx-auto px-8 pb-12">
+        <div class="flex items-end justify-between mb-6">
+            <div>
+                <div class="text-emerald-400 text-sm font-semibold tracking-[2px]">12-CATEGORY MATRIX</div>
+                <div class="font-display text-4xl font-semibold tracking-tighter">Current Global Risk Profile</div>
+            </div>
+        </div>
+        
         <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8">
-            <div class="font-semibold mb-4 text-xl">Risk Scores by Category</div>
+            <div class="font-semibold mb-4">Risk Scores by Category</div>
             <canvas id="riskBar" height="380"></canvas>
         </div>
+        
+        <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
 
-        <!-- Category Cards -->
-        <div class="mb-4 font-semibold text-xl">Risk Categories (click for details)</div>
-        <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12"></div>
+    <!-- Modal -->
+    <div id="modal" onclick="if (event.target.id === 'modal') hideModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+        <div onclick="event.stopImmediatePropagation()" class="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-auto modal">
+            <div class="p-8" id="modalContent"></div>
+        </div>
     </div>
 
     <script>
         let riskData = null;
+        let currentTheme = 'dark';
 
         async function loadData() {
             const res = await fetch('risk-data.json');
@@ -99,17 +149,10 @@
         }
 
         function renderAll() {
+            // Doomsday
             const clock = riskData.doomsday_clock;
-
-            // Update value
             document.getElementById('doomsday-value').innerHTML = clock.seconds_to_midnight;
             document.getElementById('doomsday-assessment').innerHTML = clock.assessment;
-
-            // Rotate the clock hand
-            const seconds = clock.seconds_to_midnight;
-            const degrees = (seconds / 120) * 360; // 120 seconds = full circle
-            const hand = document.getElementById('clock-hand');
-            hand.setAttribute('transform', `rotate(${degrees} 140 140)`);
 
             // Bar Chart
             const ctx = document.getElementById('riskBar');
@@ -124,24 +167,32 @@
                         )
                     }]
                 },
-                options: { indexAxis: 'y', scales: { x: { max: 3 } }, plugins: { legend: { display: false } } }
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    scales: { x: { max: 3, ticks: { stepSize: 1 } } },
+                    plugins: { legend: { display: false } }
+                }
             });
 
             // Category Cards
             const grid = document.getElementById('category-grid');
             grid.innerHTML = '';
+            
             riskData.categories.forEach((cat, index) => {
                 const color = cat.level === 'High' ? 'orange' : cat.level === 'Moderate' ? 'yellow' : 'emerald';
                 const div = document.createElement('div');
-                div.className = 'risk-card bg-slate-900 border border-slate-700 rounded-3xl p-6 cursor-pointer';
+                div.className = `risk-card bg-slate-900 border border-slate-700 rounded-3xl p-6 cursor-pointer`;
+                
                 div.innerHTML = `
-                    <div class="flex justify-between">
+                    <div class="flex justify-between items-start">
                         <div class="font-semibold">${cat.name}</div>
                         <span class="risk-badge bg-${color}-500/20 text-${color}-400">${cat.level}</span>
                     </div>
-                    <div class="mt-3 text-sm text-slate-300">${cat.metrics}</div>
+                    <div class="mt-3 text-sm text-slate-300 line-clamp-3">${cat.metrics}</div>
                     <div class="mt-4 text-xs text-emerald-400">Click for details →</div>
                 `;
+                
                 div.onclick = () => showCategoryModal(index);
                 grid.appendChild(div);
             });
@@ -149,36 +200,114 @@
 
         function showCategoryModal(index) {
             const cat = riskData.categories[index];
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4';
-            modal.innerHTML = `
-                <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full p-8" onclick="event.target.closest('.fixed').remove()">
-                    <div class="flex justify-between items-start mb-6">
-                        <div>
-                            <div class="font-display text-2xl font-semibold">${cat.name}</div>
-                            <span class="risk-badge bg-yellow-500/20 text-yellow-400 mt-1 inline-block">${cat.level} (${cat.score}/3)</span>
-                        </div>
-                        <button onclick="event.target.closest('.fixed').remove()" class="text-3xl">&times;</button>
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modalContent');
+            
+            let eventsHTML = '';
+            if (cat.recent_events && cat.recent_events.length > 0) {
+                eventsHTML = cat.recent_events.map(e => `
+                    <div class="mb-4">
+                        <div class="font-medium text-sm">${e.date}</div>
+                        <div class="text-sm mt-1">${e.description}</div>
+                        <div class="text-xs text-slate-400 mt-1">Impact: ${e.impact}</div>
                     </div>
-
-                    <div class="mb-6">
-                        <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">KEY METRICS & EVENTS</div>
-                        <div class="text-sm">${cat.metrics}</div>
+                `).join('');
+            } else {
+                eventsHTML = '<div class="text-sm text-slate-400">No major recent events recorded.</div>';
+            }
+            
+            let crossRefHTML = '';
+            if (cat.cross_references && cat.cross_references.length > 0) {
+                crossRefHTML = cat.cross_references.map(r => `
+                    <div class="mb-3">
+                        <span class="font-medium">${r.category}</span>
+                        <div class="text-sm text-slate-300 mt-1">${r.connection}</div>
                     </div>
-
-                    <div class="mb-6">
-                        <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">SOURCES</div>
-                        <div class="text-sm">${cat.sources_compared}</div>
-                        <div class="mt-2 text-xs text-emerald-400">${cat.discrepancies}</div>
-                    </div>
-
+                `).join('');
+            } else {
+                crossRefHTML = '<div class="text-sm text-slate-400">No major cross-references at this time.</div>';
+            }
+            
+            content.innerHTML = `
+                <div class="flex justify-between items-start mb-6">
                     <div>
-                        <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">CONSERVATIVE VIEW</div>
-                        <div class="bg-slate-800 p-4 rounded-2xl text-sm">${cat.conservative_reading}</div>
+                        <div class="font-display text-2xl font-semibold">${cat.name}</div>
+                        <span class="risk-badge bg-yellow-500/20 text-yellow-400 mt-1 inline-block">${cat.level} (${cat.score}/3)</span>
+                    </div>
+                    <button onclick="hideModal()" class="text-3xl leading-none">&times;</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Left Column -->
+                    <div>
+                        <div class="mb-6">
+                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">KEY METRICS &amp; CUMULATIVE CONTEXT</div>
+                            <div class="text-sm">${cat.metrics}</div>
+                            <div class="mt-3 text-sm text-slate-300">${cat.cumulative_context || ''}</div>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">RECENT EVENTS / HISTORY</div>
+                            <div class="text-sm">${eventsHTML}</div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div>
+                        <div class="mb-6">
+                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">CROSS-REFERENCES</div>
+                            <div class="text-sm">${crossRefHTML}</div>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">SOURCES &amp; DISCREPANCIES</div>
+                            <div class="text-sm">${cat.sources_compared}</div>
+                            <div class="mt-2 text-xs text-emerald-400">${cat.discrepancies}</div>
+                        </div>
+
+                        <div>
+                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">CONSERVATIVE READING</div>
+                            <div class="bg-slate-800 p-4 rounded-2xl text-sm">${cat.conservative_reading}</div>
+                        </div>
                     </div>
                 </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-700">
+                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">PREPARATION PRIORITY</div>
+                    <div class="text-sm">${cat.prep_priority}</div>
+                </div>
             `;
-            document.body.appendChild(modal);
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            
+            if (currentTheme === 'dark') {
+                body.classList.remove('bg-slate-950', 'text-slate-200');
+                body.classList.add('bg-slate-100', 'text-slate-900');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                text.innerHTML = 'Light';
+                currentTheme = 'light';
+            } else {
+                body.classList.remove('bg-slate-100', 'text-slate-900');
+                body.classList.add('bg-slate-950', 'text-slate-200');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                text.innerHTML = 'Dark';
+                currentTheme = 'dark';
+            }
         }
 
         window.onload = loadData;
