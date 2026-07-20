@@ -1,70 +1,42 @@
-# How to localise this baseline
+# Localise this baseline in about 90 minutes
 
-Work from the **`main`** branch. Do not start from `australia` unless you only want to improve the Australian build.
+Work from the **`main`** branch. Do not start from `australia` unless you are improving the Australian build.
 
-## 1. config.json
+> National agencies issue warnings.  
+> This project turns warnings into **plain-language, local, checkable context** so ordinary people prepare *before* the siren.  
+> You do not need a movement. **One careful person per country** is enough to start saving lives.
 
-Set:
+## Minimum viable country fork
 
-- `country_name` — e.g. "New Zealand"
-- `country_code` — short code for display
-- `tagline` — one line people understand
-- `official_links` — weather, emergency, fire, quake agencies people already trust
-- `language_note` — reminder that official alerts beat this site
+Ship when you have:
 
-## 2. local-data.json (most important for trust)
+- [ ] Emergency number(s)
+- [ ] National weather / geological service links
+- [ ] At least **3 present** local facts with “how to verify”
+- [ ] At least **3 historic** anchors people in your country remember
+- [ ] Evacuation note: routes are local — name the agency that owns them
+- [ ] Plain-language stage words (Watching / Raised / Building / Serious)
+- [ ] Offline kit note: install Organic Maps or OsmAnd *before* crisis; paper routes
 
-Add **present** items people can check this year, and **historic** anchors people remember.
+## 90-minute path
 
-Each item should include:
+### Minutes 0–15 — `config.json`
+Set `country_name`, `country_code`, `tagline`, `official_links`, `language_note`.
 
-- short title
-- plain-language detail
-- how to verify (which official site or map)
-- sources when possible
+### Minutes 15–40 — `local-data.json` (trust engine)
+Add **present** items people can check this year and **historic** anchors people remember. Each item needs: title, plain detail, how to verify, sources when possible.
 
-If people can verify a fact in their own country, they trust the rest of the system more — and are more likely to prepare.
+### Minutes 40–70 — `risk-data.json`
+Keep categories if they fit. Replace metrics, examples, `prep_priority`, and `conservative_reading` with local meaning. Keep global drivers (nuclear, El Niño) but always say **what they mean where you live**.
 
-## 3. risk-data.json
+### Minutes 70–85 — Offline + actions
+Copy the offline kit pattern: offline map apps, paper routes, “two ways out”. Add a Today / This week / This season action strip for your hazards.
 
-Keep the category list if it still fits. Replace:
+### Minutes 85–90 — Deploy
+GitHub Pages from your branch. Open once on a phone on Wi‑Fi so the service worker can cache.
 
-- metrics and examples with ones that matter locally
-- `prep_priority` with actions that work in your country
-- `conservative_reading` in everyday language
+## Truth-seeking rule
+When models disagree (example: El Niño strength): cite the official product (agency, date, numbers); note when data-driven models look more severe than soft headlines; do not understate because understatement feels safer.
 
-Global drivers (nuclear risk, El Niño) can stay, but always explain **what they mean where you live**.
-
-## 4. Plain language pass
-
-Search and replace technical labels with everyday words where you can.
-
-Stage words in the baseline:
-
-- Watching
-- Raised
-- Building
-- Serious
-
-If a risk is severe, say so clearly. Soft wording that hides severity is a failure mode.
-
-## 5. Truth-seeking on contested forecasts
-
-When models disagree (example: El Niño strength):
-
-- cite the official product (agency, date, numbers)
-- note when dynamical models that track deep-ocean heat look more severe than softer averages or media summaries
-- do not understate because understatement feels safer
-
-Honesty builds long-term trust. Comfortable understatement does not.
-
-## 6. Evacuation and vital local detail
-
-Add what only locals know:
-
-- emergency numbers
-- fire/flood/tsunami zones culture
-- leave-early norms
-- trusted apps
-
-The deeper and more specific you go, the better ordinary people can use the page.
+## After you ship
+Add your fork to `FORKS.md` on the upstream repo (or open an issue) so others can find a maintained local page.
