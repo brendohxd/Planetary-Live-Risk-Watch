@@ -1,223 +1,417 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earth Risk Watch — Planetary Risk Matrix</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-    <style>
-        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .risk-low { background-color: #dcfce7; color: #166534; }
-        .risk-moderate { background-color: #fef9c3; color: #854d0e; }
-        .risk-high { background-color: #ffedd5; color: #9a3412; }
-        .risk-severe { background-color: #fee2e2; color: #991b1b; }
-        details summary { list-style: none; }
-        details summary::-webkit-details-marker { display: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Earth Risk Watch</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root { --bg:#020617; --panel:#0f172a; --border:#334155; --text:#e2e8f0; --muted:#94a3b8; --accent:#10b981; }
+  body.light { --bg:#f8fafc; --panel:#ffffff; --border:#cbd5e1; --text:#0f172a; --muted:#475569; --accent:#059669; }
+  body.a11y-contrast { --bg:#000000; --panel:#111111; --border:#ffffff; --text:#ffffff; --muted:#dddddd; --accent:#ffcc00; }
+  body { background:var(--bg); color:var(--text); transition:background .2s,color .2s; }
+  .panel { background:var(--panel); border:1px solid var(--border); }
+  .muted { color:var(--muted); }
+  .accent { color:var(--accent); }
+  body.a11y-large { font-size:112%; }
+  .risk-badge { padding:.15rem .6rem; border-radius:9999px; font-size:.7rem; font-weight:600; }
+  .risk-card { transition:transform .15s, border-color .15s; }
+  .risk-card:hover { transform:translateY(-2px); border-color:var(--accent); }
+  .nav-link { cursor:pointer; }
+  .nav-link:hover { color:var(--accent); }
+</style>
 </head>
 <body class="bg-slate-950 text-slate-200">
-    <div class="max-w-7xl mx-auto p-4 md:p-6">
-        <!-- Header -->
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-8">
-            <div>
-                <h1 class="text-3xl md:text-4xl font-bold tracking-tight">Earth Risk Watch</h1>
-                <p class="text-slate-400 mt-1">Planetary Risk Matrix — Transparent global risk monitoring</p>
-            </div>
-            <div class="mt-4 md:mt-0 text-sm text-slate-500">
-                Data-driven • Multi-source • Conservative readings
-            </div>
-        </div>
-
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" id="summary-cards">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-                <div class="text-sm text-slate-400">Overall Profile</div>
-                <div class="text-xl font-semibold mt-1" id="overall-profile">Loading…</div>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-                <div class="text-sm text-slate-400">Top Concerns</div>
-                <ul class="mt-2 text-sm space-y-1" id="top-concerns"></ul>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-                <div class="text-sm text-slate-400">Doomsday Clock</div>
-                <div class="text-4xl font-bold mt-1 tracking-tighter" id="doomsday-seconds">—</div>
-                <div class="text-xs text-slate-500" id="doomsday-note">seconds to midnight</div>
-            </div>
-        </div>
-
-        <!-- Charts -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
-                <h2 class="font-semibold mb-3">Risk Radar</h2>
-                <div id="radar-chart" style="min-height: 420px;"></div>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
-                <h2 class="font-semibold mb-3">Risk Scores</h2>
-                <div id="bar-chart" style="min-height: 420px;"></div>
-            </div>
-        </div>
-
-        <!-- Expandable Categories -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-8">
-            <h2 class="font-semibold mb-2">Detailed Category Breakdown</h2>
-            <p class="text-sm text-slate-400 mb-5">Tap any category to expand full metrics, justification, and preparation notes.</p>
-            <div class="space-y-3" id="category-list"></div>
-        </div>
-
-        <!-- Cascading + Prep -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
-                <h2 class="font-semibold mb-3">Cascading Risks</h2>
-                <p class="text-sm text-slate-300" id="cascading-notes">Loading…</p>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
-                <h2 class="font-semibold mb-3">Preparation Priorities</h2>
-                <div class="text-sm space-y-2" id="prep-notes">
-                    <p class="text-orange-400 font-medium">Critical</p>
-                    <p class="text-slate-300 text-sm">Focus on High categories first. Maintain household emergency kits and monitor official alerts.</p>
-                    <p class="text-yellow-400 font-medium mt-3">This Week</p>
-                    <p class="text-slate-300 text-sm">Review personal preparedness plans and local risk resources.</p>
-                </div>
-            </div>
-        </div>
-
-        <footer class="text-center text-xs text-slate-500 py-6">
-            Earth Risk Watch • Data from authoritative public sources • Conservative risk readings • 
-            <a href="https://github.com/brendohxd/Planetary-Live-Risk-Watch" class="text-blue-400 hover:underline">GitHub</a>
-        </footer>
+  <nav class="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-50" style="background:var(--bg);border-color:var(--border)">
+    <div class="max-w-screen-2xl mx-auto px-8 py-4 flex items-center justify-between flex-wrap gap-y-3">
+      <div class="flex items-center gap-x-3">
+        <div class="w-9 h-9 bg-emerald-600 rounded-2xl flex items-center justify-center"><i class="fa-solid fa-globe text-white text-2xl"></i></div>
+        <span class="font-display text-2xl font-semibold tracking-tighter">Earth Risk Watch</span>
+      </div>
+      <div class="flex items-center gap-x-5 text-sm flex-wrap">
+        <a href="#dashboard" class="nav-link hover:text-white transition-colors">Dashboard</a>
+        <a href="#risks" class="nav-link hover:text-white transition-colors">Risk Matrix</a>
+        <a href="#cascading" class="nav-link hover:text-white transition-colors">Cascading Impacts</a>
+        <a href="#preparation" class="nav-link hover:text-white transition-colors">Preparation Hub</a>
+        <a href="#methodology" class="nav-link hover:text-white transition-colors">Transparency</a>
+        <button onclick="showLocationModal()" class="px-4 py-1.5 text-xs border rounded-xl hover:bg-slate-900 flex items-center gap-x-2" style="border-color:var(--border)">
+          <i class="fa-solid fa-map-marker-alt"></i><span>Location &amp; Alerts</span>
+        </button>
+        <button onclick="toggleA11yContrast()" title="Toggle high contrast" class="px-3 py-1.5 text-xs border rounded-xl hover:bg-slate-900" style="border-color:var(--border)"><i class="fa-solid fa-circle-half-stroke"></i></button>
+        <button onclick="toggleA11yLarge()" title="Toggle larger text" class="px-3 py-1.5 text-xs border rounded-xl hover:bg-slate-900" style="border-color:var(--border)"><i class="fa-solid fa-text-height"></i></button>
+        <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs border rounded-xl hover:bg-slate-900 flex items-center gap-x-2" style="border-color:var(--border)"><i class="fa-solid fa-moon" id="theme-icon"></i></button>
+      </div>
     </div>
+  </nav>
 
-    <script>
-        async function loadData() {
-            try {
-                const res = await fetch('risk-data.json');
-                if (!res.ok) throw new Error('Failed to fetch risk-data.json');
-                const data = await res.json();
-                renderDashboard(data);
-            } catch (err) {
-                console.error(err);
-                document.body.innerHTML = `
-                    <div class="min-h-screen flex items-center justify-center p-6 bg-slate-950 text-slate-200">
-                        <div class="max-w-md text-center">
-                            <h1 class="text-2xl font-bold mb-3">Error loading data</h1>
-                            <p class="text-slate-400 mb-4">Please hard refresh the page (Ctrl/Cmd + Shift + R). If the problem persists, the data file may be temporarily unavailable.</p>
-                            <p class="text-xs text-slate-500">Technical detail: ${err.message}</p>
-                        </div>
-                    </div>`;
-            }
-        }
+  <div id="dashboard" class="max-w-screen-2xl mx-auto px-8 pt-12 pb-4">
+    <h1 class="font-display text-5xl md:text-6xl leading-none tracking-tighter font-semibold mb-3">Stay informed.<br><span class="accent">Be prepared.</span></h1>
+    <p class="muted max-w-2xl mb-2">Transparent, multi-source, data-driven monitoring of global risks. No sensationalism, no downplaying — discrepancies between sources are shown, not hidden.</p>
+    <p class="text-xs muted" id="lastUpdated"></p>
+  </div>
 
-        function renderDashboard(data) {
-            // Support both old structure (categories array) and newer dict-style
-            let categories = [];
-            if (Array.isArray(data.categories)) {
-                categories = data.categories;
-            } else {
-                // Convert dict-style from generator
-                const keys = Object.keys(data).filter(k => !['Overall_Summary','Doomsday_Clock','Astronomical_Context'].includes(k));
-                categories = keys.map(k => ({
-                    name: k,
-                    level: data[k].level || 'Low',
-                    score: data[k].score || 0,
-                    metrics: data[k].metrics || '',
-                    justification: data[k].justification || '',
-                    trend: data[k].trend || 'stable',
-                    prep_priority: data[k].prep_priority || '',
-                    links: data[k].links || [],
-                    historic_note: data[k].historic_note || data[k].historic || ''
-                }));
-            }
+  <!-- Doomsday Clock + summary -->
+  <div class="max-w-screen-2xl mx-auto px-8 pb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="panel border rounded-3xl p-8 lg:col-span-1 flex flex-col items-center justify-center text-center">
+      <div class="text-xs uppercase tracking-widest muted mb-3">Doomsday Clock</div>
+      <svg id="doomsdaySvg" viewBox="0 0 220 220" class="w-48 h-48">
+        <circle cx="110" cy="110" r="100" fill="none" stroke="var(--border)" stroke-width="4"/>
+        <text x="110" y="24" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="700">MIDNIGHT</text>
+        <g id="clockTicks"></g>
+        <line id="clockHand" x1="110" y1="110" x2="110" y2="20" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="110" cy="110" r="6" fill="#ef4444"/>
+      </svg>
+      <div class="mt-3 text-2xl font-semibold" id="doomsdayLabel">-- seconds to midnight</div>
+      <div class="text-xs muted mt-1" id="doomsdaySource"></div>
+      <p class="text-sm mt-4" id="doomsdayContext"></p>
+    </div>
+    <div class="panel border rounded-3xl p-8 lg:col-span-2">
+      <div class="font-display text-2xl font-semibold tracking-tighter mb-4">Current Global Risk Profile</div>
+      <canvas id="riskBar" height="260"></canvas>
+    </div>
+  </div>
 
-            const overall = data.Overall_Summary || data.overall || {};
-            const doomsday = data.Doomsday_Clock || data.doomsday || {};
+  <div id="risks" class="max-w-screen-2xl mx-auto px-8 pb-12">
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-y-2">
+      <div class="font-display text-3xl font-semibold tracking-tighter">Risk Matrix</div>
+      <button onclick="speakText(overallSummaryText())" class="text-xs px-3 py-1.5 border rounded-xl hover:bg-slate-900" style="border-color:var(--border)"><i class="fa-solid fa-volume-high mr-2"></i>Listen to summary</button>
+    </div>
+    <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </div>
 
-            document.getElementById('overall-profile').textContent = overall.overall_risk_profile || overall.profile || 'See categories';
-            const concerns = overall.top_concerns || [];
-            document.getElementById('top-concerns').innerHTML = concerns.slice(0,4).map(c => `<li class="flex gap-2"><span class="text-orange-400">•</span>${c}</li>`).join('') || '<li class="text-slate-500">None flagged</li>';
-            document.getElementById('doomsday-seconds').textContent = doomsday.seconds_to_midnight || doomsday.seconds || '85';
-            document.getElementById('doomsday-note').textContent = `seconds to midnight • ${doomsday.last_set || 'Jan 2026'}`;
-            document.getElementById('cascading-notes').textContent = overall.cascading_notes || overall.cascading || 'No major cascading risks highlighted in this assessment.';
+  <div id="cascading" class="max-w-screen-2xl mx-auto px-8 pb-12">
+    <div class="font-display text-3xl font-semibold tracking-tighter mb-2">Cascading Impacts &amp; Interconnections</div>
+    <p class="muted mb-6 max-w-3xl">Risks rarely occur in isolation. This section shows how categories amplify one another based on the cross-references documented in each risk assessment below.</p>
+    <div id="cascading-list" class="space-y-3"></div>
+  </div>
 
-            // Charts
-            const names = categories.map(c => c.name);
-            const scores = categories.map(c => c.score);
-            const colors = categories.map(c => {
-                if (c.level === 'Severe') return '#c0392b';
-                if (c.level === 'High') return '#e67e22';
-                if (c.level === 'Moderate') return '#f1c40f';
-                return '#2ecc71';
-            });
+  <div id="preparation" class="max-w-screen-2xl mx-auto px-8 pb-12">
+    <div class="font-display text-3xl font-semibold tracking-tighter mb-2">Preparation Hub</div>
+    <p class="muted mb-6 max-w-3xl">General resilience priorities that apply across most scenarios, tiered by urgency. Category-specific guidance is available in each risk card above.</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="panel border rounded-3xl p-6">
+        <div class="text-xs uppercase tracking-widest muted mb-2">Immediate</div>
+        <ul class="text-sm space-y-2 list-disc list-inside">
+          <li>Know evacuation routes for earthquake, tsunami, wildfire, or flood risk in your area</li>
+          <li>Keep a basic emergency kit (water, food, first aid, flashlight, radio, medications)</li>
+          <li>Register for local official alert systems</li>
+        </ul>
+      </div>
+      <div class="panel border rounded-3xl p-6">
+        <div class="text-xs uppercase tracking-widest muted mb-2">This Week</div>
+        <ul class="text-sm space-y-2 list-disc list-inside">
+          <li>Review household emergency fund and food/water buffer (1-2 weeks minimum)</li>
+          <li>Check insurance coverage for flood, fire, and property damage</li>
+          <li>Set your location in the Location &amp; Alerts panel above for tailored notes</li>
+        </ul>
+      </div>
+      <div class="panel border rounded-3xl p-6">
+        <div class="text-xs uppercase tracking-widest muted mb-2">Ongoing</div>
+        <ul class="text-sm space-y-2 list-disc list-inside">
+          <li>Follow official sources (NOAA, USGS, WHO, local emergency management) directly, not just this dashboard</li>
+          <li>Diversify food/energy supply where feasible if you rely on vulnerable supply chains</li>
+          <li>Revisit this page regularly — risk is cumulative, not just today's snapshot</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
-            // Radar
-            Plotly.newPlot('radar-chart', [{
-                type: 'scatterpolar',
-                r: [...scores, scores[0]],
-                theta: [...names, names[0]],
-                fill: 'toself',
-                fillcolor: 'rgba(59,130,246,0.15)',
-                line: { color: '#94a3b8', width: 2 },
-                marker: { size: 8, color: colors }
-            }], {
-                polar: {
-                    radialaxis: { visible: true, range: [0, 3.3], tickvals: [0,1,2,3], ticktext: ['Low','Mod','High','Sev'], tickfont: { size: 10, color: '#94a3b8' }, gridcolor: '#334155' },
-                    angularaxis: { tickfont: { size: 9, color: '#e2e8f0' }, gridcolor: '#334155' },
-                    bgcolor: 'rgba(15,23,42,0.6)'
-                },
-                showlegend: false, height: 420, margin: { t: 40, b: 40, l: 50, r: 50 },
-                paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: { color: '#e2e8f0' }
-            }, { responsive: true, displayModeBar: false });
+  <div id="methodology" class="max-w-screen-2xl mx-auto px-8 pb-16">
+    <div class="font-display text-3xl font-semibold tracking-tighter mb-2">Transparency &amp; Methodology</div>
+    <div class="panel border rounded-3xl p-8 muted text-sm space-y-3 max-w-4xl">
+      <p><strong class="text-current">Multi-source rule:</strong> every category is assessed against at least two independent authoritative sources (government/scientific agencies preferred). Where sources disagree on severity, timeline, or interpretation, the discrepancy is shown explicitly rather than averaged away.</p>
+      <p><strong class="text-current">Conservative reading:</strong> when sources diverge, the more cautious reading is used for the displayed risk level, to avoid understating risk for the sake of avoiding alarm.</p>
+      <p><strong class="text-current">Cumulative context:</strong> a quiet week does not reset a risk level. Multi-month trends (e.g. El Niño strengthening, geomagnetic field weakening) are tracked and reflected even when the latest data point looks calm.</p>
+      <p><strong class="text-current">Confidence:</strong> data freshness and source agreement vary by category — see each category's "Sources Compared" and "Discrepancies" fields for specifics.</p>
+      <p><strong class="text-current">Limitations:</strong> this is a public awareness tool, not an official warning system. Always follow official local emergency guidance over this dashboard.</p>
+    </div>
+  </div>
 
-            // Bar
-            Plotly.newPlot('bar-chart', [{
-                type: 'bar',
-                x: names,
-                y: scores,
-                marker: { color: colors },
-                text: categories.map(c => c.level),
-                textposition: 'outside',
-                textfont: { color: '#e2e8f0', size: 11 },
-                hovertemplate: '<b>%{x}</b><br>Score: %{y}/3<br>Level: %{text}<extra></extra>'
-            }], {
-                showlegend: false, height: 420,
-                margin: { t: 30, b: 110, l: 40, r: 20 },
-                paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: { color: '#e2e8f0' },
-                xaxis: { tickangle: -35, tickfont: { size: 10 }, gridcolor: '#1e293b' },
-                yaxis: { range: [0, 3.5], tickvals: [0,1,2,3], gridcolor: '#1e293b' },
-                bargap: 0.25
-            }, { responsive: true, displayModeBar: false });
+  <div id="modal" onclick="if (event.target.id === 'modal') hideModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+    <div onclick="event.stopImmediatePropagation()" class="panel border rounded-3xl max-w-3xl w-full p-8 max-h-[85vh] overflow-y-auto" id="modalContent"></div>
+  </div>
 
-            // Expandable list
-            const list = document.getElementById('category-list');
-            list.innerHTML = categories.map(cat => {
-                const lvl = (cat.level || 'Low').toLowerCase();
-                const links = (cat.links || []).slice(0,3).map(l => `<a href="${l}" target="_blank" rel="noopener" class="text-blue-400 hover:underline text-xs">Source →</a>`).join(' ');
-                return `
-                <details class="group bg-slate-950/60 border border-slate-800 rounded-2xl overflow-hidden">
-                    <summary class="flex flex-wrap items-center gap-3 cursor-pointer p-4 hover:bg-slate-800/40 transition">
-                        <span class="font-medium flex-1 min-w-[160px]">${cat.name}</span>
-                        <span class="px-3 py-0.5 rounded-full text-xs font-medium risk-${lvl}">${cat.level}</span>
-                        <span class="font-mono text-sm text-slate-300">${cat.score}/3</span>
-                        <span class="text-xs text-slate-500 uppercase">${cat.trend || 'stable'}</span>
-                    </summary>
-                    <div class="px-4 pb-5 pt-1 border-t border-slate-800/80 text-sm space-y-3">
-                        <div>
-                            <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Current Metrics</div>
-                            <p class="text-slate-200">${cat.metrics || '—'}</p>
-                        </div>
-                        ${cat.justification ? `<div><div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Justification</div><p class="text-slate-300">${cat.justification}</p></div>` : ''}
-                        ${cat.historic_note ? `<div><div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Recent Historic Context</div><p class="text-slate-400">${cat.historic_note}</p></div>` : ''}
-                        <div>
-                            <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Preparation</div>
-                            <p class="text-slate-300">${cat.prep_priority || cat.prep || 'Standard monitoring.'}</p>
-                        </div>
-                        ${links ? `<div class="flex flex-wrap gap-3 pt-1">${links}</div>` : ''}
-                    </div>
-                </details>`;
-            }).join('');
-        }
+  <div id="locationModal" onclick="if (event.target.id === 'locationModal') hideLocationModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+    <div onclick="event.stopImmediatePropagation()" class="panel border rounded-3xl max-w-md w-full p-8">
+      <div class="flex justify-between items-center mb-6">
+        <div class="font-display text-xl font-semibold">Location &amp; Alerts</div>
+        <button onclick="hideLocationModal()" class="text-2xl leading-none">&times;</button>
+      </div>
+      <div class="mb-6">
+        <label class="block text-sm mb-2">Your Location</label>
+        <div class="flex gap-x-2">
+          <input id="locationInput" type="text" placeholder="City or Region" class="flex-1 bg-slate-800 border rounded-2xl px-4 py-2 text-sm" style="border-color:var(--border);background:transparent">
+          <button onclick="detectLocation()" class="px-4 py-2 text-sm border rounded-2xl hover:bg-slate-800" style="border-color:var(--border)">Detect</button>
+        </div>
+        <div id="currentLocation" class="text-xs accent mt-2"></div>
+      </div>
+      <div class="mb-8">
+        <label class="flex items-center gap-x-3 cursor-pointer">
+          <input type="checkbox" id="notifyToggle" class="accent-emerald-600">
+          <span class="text-sm">Notify me about relevant risks and warnings for my area</span>
+        </label>
+      </div>
+      <div class="flex gap-x-3">
+        <button onclick="saveLocationPreferences()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-sm font-semibold text-white">Save Preferences</button>
+        <button onclick="hideLocationModal()" class="flex-1 py-2.5 border rounded-2xl text-sm" style="border-color:var(--border)">Cancel</button>
+      </div>
+    </div>
+  </div>
 
-        window.onload = loadData;
-    </script>
+<script>
+let riskData = null;
+let currentTheme = 'dark';
+
+async function loadData() {
+  try {
+    const res = await fetch('risk-data.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    riskData = await res.json();
+    renderAll();
+    restorePreferences();
+  } catch (e) {
+    console.error('Failed to load risk-data.json:', e);
+    document.body.innerHTML = '<div class="p-8"><h1 class="text-xl mb-4">Error loading data</h1><p>Please hard refresh the page (Ctrl/Cmd + Shift + R). If the problem persists, risk-data.json may be missing, malformed, or temporarily unavailable. Error: ' + (e && e.message ? e.message : e) + '</p></div>';
+  }
+}
+
+function levelColor(level) {
+  return level === 'High' ? '#f59e0b' : level === 'Moderate' ? '#eab308' : level === 'Low' ? '#10b981' : '#64748b';
+}
+function levelTailwind(level) {
+  return level === 'High' ? 'orange' : level === 'Moderate' ? 'yellow' : level === 'Low' ? 'emerald' : 'slate';
+}
+
+function renderAll() {
+  document.getElementById('lastUpdated').textContent = 'Data as of ' + (riskData.date || 'unknown date') + (riskData.last_updated ? (' · updated ' + riskData.last_updated) : '');
+
+  renderDoomsday();
+  renderBarChart();
+  renderCategoryGrid();
+  renderCascading();
+}
+
+function renderDoomsday() {
+  const dc = riskData.doomsday_clock;
+  const ticks = document.getElementById('clockTicks');
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * 2 * Math.PI;
+    const x1 = 110 + 90 * Math.sin(angle), y1 = 110 - 90 * Math.cos(angle);
+    const x2 = 110 + 100 * Math.sin(angle), y2 = 110 - 100 * Math.cos(angle);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('stroke', 'var(--muted)'); line.setAttribute('stroke-width', '2');
+    ticks.appendChild(line);
+  }
+  if (!dc) return;
+  const secs = dc.seconds_to_midnight;
+  // Map seconds-to-midnight onto the clock face: fewer seconds = closer to 12 (midnight).
+  // We show the hand approaching 12 from the counter-clockwise side as seconds decrease.
+  const maxSecs = 600; // 10 minutes as a visual reference ceiling
+  const clamped = Math.min(secs, maxSecs);
+  const fraction = clamped / maxSecs; // 1 = far from midnight, 0 = at midnight
+  const angle = -fraction * (Math.PI / 3); // sweep within a 60-degree arc approaching 12
+  const hx = 110 + 90 * Math.sin(angle);
+  const hy = 110 - 90 * Math.cos(angle);
+  document.getElementById('clockHand').setAttribute('x2', hx);
+  document.getElementById('clockHand').setAttribute('y2', hy);
+  document.getElementById('doomsdayLabel').textContent = secs + ' seconds to midnight';
+  document.getElementById('doomsdaySource').textContent = (dc.source || '') + (dc.as_of ? (' · set ' + dc.as_of) : '');
+  document.getElementById('doomsdayContext').textContent = dc.context || '';
+}
+
+let barChartInstance = null;
+function renderBarChart() {
+  const ctx = document.getElementById('riskBar');
+  if (barChartInstance) barChartInstance.destroy();
+  barChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: riskData.categories.map(c => c.name),
+      datasets: [{
+        data: riskData.categories.map(c => c.score),
+        backgroundColor: riskData.categories.map(c => levelColor(c.level))
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      scales: { x: { max: 3, ticks: { color: 'currentColor' } }, y: { ticks: { color: 'currentColor' } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function renderCategoryGrid() {
+  const grid = document.getElementById('category-grid');
+  grid.innerHTML = '';
+  riskData.categories.forEach((cat, index) => {
+    const color = levelTailwind(cat.level);
+    const isNuclear = cat.name === 'Nuclear Risk';
+    const div = document.createElement('div');
+    div.className = 'risk-card panel border rounded-3xl p-6 cursor-pointer' + (isNuclear ? ' ring-1 ring-red-500/40' : '');
+    div.innerHTML = `
+      <div class="flex justify-between items-start">
+        <div class="font-semibold">${cat.name}${isNuclear ? ' <span class="text-[10px] align-middle text-red-400 border border-red-500/50 rounded-full px-2 py-0.5 ml-1">Doomsday Clock driver</span>' : ''}</div>
+        <span class="risk-badge bg-${color}-500/20 text-${color}-400">${cat.level}</span>
+      </div>
+      <div class="mt-2 text-xs muted">Trend: ${cat.trend || 'n/a'}</div>
+      <div class="mt-3 text-sm line-clamp-3">${cat.metrics}</div>
+      <div class="mt-4 text-xs accent">Click for details, event history &amp; sources →</div>
+    `;
+    div.onclick = () => showCategoryModal(index);
+    grid.appendChild(div);
+  });
+}
+
+function showCategoryModal(index) {
+  const cat = riskData.categories[index];
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('modalContent');
+  const color = levelTailwind(cat.level);
+
+  let eventsHTML = '<div class="text-sm muted">No recent events recorded.</div>';
+  if (cat.recent_events && cat.recent_events.length) {
+    eventsHTML = cat.recent_events.map(e => `
+      <div class="mb-3 p-3 rounded-2xl border" style="border-color:var(--border)">
+        <div class="font-medium text-sm">${e.date}</div>
+        <div class="text-sm mt-1">${e.description}</div>
+        <div class="text-xs muted mt-1">${e.impact || ''}</div>
+        ${e.sources ? `<div class="text-xs accent mt-1">Sources: ${e.sources.join(', ')}</div>` : ''}
+      </div>`).join('');
+  }
+
+  let crossHTML = '<div class="text-sm muted">None documented.</div>';
+  if (cat.cross_references && cat.cross_references.length) {
+    crossHTML = cat.cross_references.map(r => `<div class="mb-2"><span class="font-medium">${r.category}:</span> ${r.connection}${r.metric ? `<div class="text-xs muted mt-0.5">${r.metric}</div>` : ''}</div>`).join('');
+  }
+
+  const spoken = [cat.name + '.', 'Risk level: ' + cat.level + '.', 'Trend: ' + (cat.trend || 'n/a') + '.', cat.metrics, cat.cumulative_context || '', 'Preparation priority: ' + (cat.prep_priority || '')].join(' ');
+
+  content.innerHTML = `
+    <div class="flex justify-between mb-6">
+      <div>
+        <div class="font-display text-2xl font-semibold">${cat.name}</div>
+        <div class="flex items-center gap-x-2 mt-1">
+          <span class="risk-badge bg-${color}-500/20 text-${color}-400">${cat.level}</span>
+          <span class="text-xs muted">Trend: ${cat.trend || 'n/a'}</span>
+        </div>
+      </div>
+      <div class="flex items-start gap-x-3">
+        <button onclick="speakText(\`${spoken.replace(/`/g, "'")}\`)" class="text-xl" title="Listen"><i class="fa-solid fa-volume-high"></i></button>
+        <button onclick="hideModal()" class="text-3xl leading-none">&times;</button>
+      </div>
+    </div>
+    <div class="mb-6"><div class="text-xs uppercase tracking-widest muted mb-1">KEY METRICS</div><div class="text-sm">${cat.metrics}</div></div>
+    <div class="mb-6"><div class="text-xs uppercase tracking-widest muted mb-1">CUMULATIVE / TREND CONTEXT</div><div class="text-sm">${cat.cumulative_context || 'n/a'}</div></div>
+    <div class="mb-6"><div class="text-xs uppercase tracking-widest muted mb-1">RECENT EVENTS</div>${eventsHTML}</div>
+    <div class="mb-6"><div class="text-xs uppercase tracking-widest muted mb-1">SOURCES COMPARED &amp; DISCREPANCIES</div><div class="text-sm">${cat.sources_compared || 'n/a'}</div><div class="text-sm muted mt-1">${cat.discrepancies || ''}</div></div>
+    <div class="mb-6"><div class="text-xs uppercase tracking-widest muted mb-1">CONSERVATIVE READING</div><div class="text-sm">${cat.conservative_reading || 'n/a'}</div></div>
+    <div class="mb-6"><div class="text-xs uppercase tracking-widest muted mb-1">CROSS-REFERENCES</div><div class="text-sm">${crossHTML}</div></div>
+    <div><div class="text-xs uppercase tracking-widest muted mb-1">PREPARATION</div><div class="text-sm">${cat.prep_priority}</div></div>
+  `;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function renderCascading() {
+  const list = document.getElementById('cascading-list');
+  list.innerHTML = '';
+  riskData.categories.forEach(cat => {
+    if (!cat.cross_references || !cat.cross_references.length) return;
+    const div = document.createElement('div');
+    div.className = 'panel border rounded-2xl p-5';
+    div.innerHTML = `
+      <div class="font-semibold mb-2">${cat.name} <span class="muted font-normal text-sm">amplifies / is amplified by:</span></div>
+      <div class="text-sm space-y-1">
+        ${cat.cross_references.map(r => `<div>→ <span class="font-medium">${r.category}</span> — ${r.connection}</div>`).join('')}
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function hideModal() {
+  document.getElementById('modal').classList.add('hidden');
+  document.getElementById('modal').classList.remove('flex');
+}
+
+function showLocationModal() {
+  document.getElementById('locationModal').classList.remove('hidden');
+  document.getElementById('locationModal').classList.add('flex');
+}
+function hideLocationModal() {
+  document.getElementById('locationModal').classList.remove('flex');
+  document.getElementById('locationModal').classList.add('hidden');
+}
+function detectLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      document.getElementById('locationInput').value = pos.coords.latitude.toFixed(2) + ', ' + pos.coords.longitude.toFixed(2);
+    });
+  }
+}
+function saveLocationPreferences() {
+  const location = document.getElementById('locationInput').value.trim();
+  const notify = document.getElementById('notifyToggle').checked;
+  localStorage.setItem('userPreferences', JSON.stringify({ location, notify }));
+  document.getElementById('currentLocation').textContent = location ? ('Saved: ' + location) : '';
+  hideLocationModal();
+}
+
+function toggleTheme() {
+  const body = document.body;
+  const icon = document.getElementById('theme-icon');
+  if (currentTheme === 'dark') {
+    body.classList.add('light');
+    icon.classList.remove('fa-moon'); icon.classList.add('fa-sun');
+    currentTheme = 'light';
+  } else {
+    body.classList.remove('light');
+    icon.classList.remove('fa-sun'); icon.classList.add('fa-moon');
+    currentTheme = 'dark';
+  }
+  localStorage.setItem('erw_theme', currentTheme);
+}
+function toggleA11yContrast() {
+  document.body.classList.toggle('a11y-contrast');
+  localStorage.setItem('erw_a11y_contrast', document.body.classList.contains('a11y-contrast') ? '1' : '0');
+}
+function toggleA11yLarge() {
+  document.body.classList.toggle('a11y-large');
+  localStorage.setItem('erw_a11y_large', document.body.classList.contains('a11y-large') ? '1' : '0');
+}
+
+function speakText(text) {
+  if (!('speechSynthesis' in window)) { alert('Text-to-speech is not supported in this browser.'); return; }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  window.speechSynthesis.speak(utter);
+}
+function overallSummaryText() {
+  if (!riskData) return '';
+  const s = riskData.overall_summary || {};
+  return [s.framing || '', s.cumulative_context || ''].join(' ');
+}
+
+function restorePreferences() {
+  try {
+    const prefs = JSON.parse(localStorage.getItem('userPreferences') || 'null');
+    if (prefs) {
+      document.getElementById('locationInput').value = prefs.location || '';
+      document.getElementById('notifyToggle').checked = !!prefs.notify;
+      if (prefs.location) document.getElementById('currentLocation').textContent = 'Saved: ' + prefs.location;
+    }
+  } catch (e) { /* ignore malformed prefs */ }
+
+  if (localStorage.getItem('erw_theme') === 'light') toggleTheme();
+  if (localStorage.getItem('erw_a11y_contrast') === '1') document.body.classList.add('a11y-contrast');
+  if (localStorage.getItem('erw_a11y_large') === '1') document.body.classList.add('a11y-large');
+}
+
+window.onload = loadData;
+</script>
 </body>
 </html>
