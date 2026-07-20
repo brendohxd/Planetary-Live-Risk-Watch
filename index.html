@@ -52,11 +52,7 @@ header.site-header{border-bottom:1px solid var(--border);background:rgba(5,7,13,
 body.light .map-box{background:rgba(15,23,42,.04)}
 .map-box svg{width:100%;height:auto;display:block}
 @media (max-width:640px){#radar-chart{height:260px!important}}
-@media print{
-  header,.a11y-btn,#radar-chart,section.panel-hot,.no-print{display:none!important}
-  body{background:#fff;color:#000;font-size:12pt}
-  .panel{border:1px solid #ccc;box-shadow:none;break-inside:avoid}
-}
+@media print{header,.a11y-btn,#radar-chart,section.panel-hot,.no-print{display:none!important}body{background:#fff;color:#000;font-size:12pt}.panel{border:1px solid #ccc;box-shadow:none;break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -64,7 +60,7 @@ body.light .map-box{background:rgba(15,23,42,.04)}
 <div class="max-w-3xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
 <a href="#" onclick="showHome();return false" class="flex items-center gap-2.5 font-semibold"><span class="icon-chip"><i class="fa-solid fa-earth-oceania"></i></span>Earth Risk Watch · AU</a>
 <div class="flex gap-1 flex-wrap">
-<button type="button" class="a11y-btn" id="btn-theme" aria-pressed="false" title="Toggle light / dark">Light</button>
+<button type="button" class="a11y-btn" id="btn-theme" aria-pressed="false">Light</button>
 <button type="button" class="a11y-btn" id="btn-tts" aria-pressed="false">Listen</button>
 <button type="button" class="a11y-btn" id="btn-text" aria-pressed="false">Bigger text</button>
 <button type="button" class="a11y-btn" id="btn-contrast" aria-pressed="false">Contrast</button>
@@ -72,7 +68,7 @@ body.light .map-box{background:rgba(15,23,42,.04)}
 </div>
 </header>
 <main id="app" class="max-w-3xl mx-auto px-4 pb-24">
-<div id="offline-banner" class="offline-banner" role="status">You appear offline. Showing the last saved briefing on this device. Live warnings need a connection — use a battery radio or neighbours if you can.</div>
+<div id="offline-banner" class="offline-banner" role="status">You appear offline. Showing the last saved briefing on this device. Live warnings need a connection.</div>
 <div id="home-view">
 <section class="pt-10 pb-6">
 <p class="brand text-sm font-medium mb-2">Built for Australia first</p>
@@ -85,24 +81,49 @@ body.light .map-box{background:rgba(15,23,42,.04)}
 <div class="label mb-2">In plain English</div>
 <p class="text-sm leading-relaxed muted">We avoid jargon where we can. When something is <strong>serious</strong>, we say so clearly. Official warnings always beat this website — use BOM, your state emergency service, and local fire apps first.</p>
 </section>
+<section class="panel rounded-3xl p-5 mb-6" style="border-color:rgba(52,211,153,.35)">
+<div class="label mb-2">What do I do?</div>
+<h2 class="font-semibold text-lg mb-2">Action strip</h2>
+<p class="text-sm muted mb-3">Three time boxes. Pick who you are so the list matches your place.</p>
+<div class="flex flex-wrap gap-2 mb-4">
+<button type="button" class="a11y-btn" data-aud="all" aria-pressed="true">Everyone</button>
+<button type="button" class="a11y-btn" data-aud="bush" aria-pressed="false">Near bush / grass</button>
+<button type="button" class="a11y-btn" data-aud="city" aria-pressed="false">City / apartment</button>
+<button type="button" class="a11y-btn" data-aud="rural" aria-pressed="false">Farm / rural</button>
+</div>
+<div id="action-strip" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+<div class="mt-4 flex flex-wrap gap-3 text-sm">
+<a class="src-link" href="https://www.bom.gov.au/" target="_blank" rel="noopener">BOM warnings</a>
+<a class="src-link" href="https://www.bom.gov.au/climate/outlooks/" target="_blank" rel="noopener">BOM climate outlook</a>
+<a class="src-link" href="https://www.afac.com.au/" target="_blank" rel="noopener">State fire agencies</a>
+</div>
+</section>
+<section class="panel rounded-3xl p-5 mb-6">
+<div class="label mb-2">Since your last visit</div>
+<div id="changelog"><p class="text-sm muted">Loading…</p></div>
+</section>
+<section class="panel rounded-3xl p-5 mb-6" style="border-color:rgba(251,113,133,.35)">
+<div class="label mb-2">Nuclear risk — honesty box</div>
+<p class="text-sm muted leading-relaxed">For nuclear risk, the useful levers are mostly <strong>politics and verified arms limits</strong>, not a household kit. For heat, fire, and flood, household prep works. This site will not pretend a go-bag solves nuclear war.</p>
+<button onclick="openCategory('Nuclear Risk')" class="mt-3 text-sm brand">Open nuclear briefing →</button>
+</section>
 <section class="panel rounded-3xl p-5 mb-6 no-print" style="border-color:rgba(251,191,36,.4)">
-<div class="label mb-2">Offline kit · do this while you still have signal</div>
+<div class="label mb-2">Offline kit · while you still have signal</div>
 <h2 class="font-semibold text-lg mb-2">When Google Maps dies, people panic</h2>
-<p class="text-sm muted mb-3">This website is <strong>not</strong> turn-by-turn navigation. A webpage cannot replace GPS maps if both data and GPS are gone. What works is preparing <em>before</em> that day.</p>
+<p class="text-sm muted mb-3">This site is <strong>not</strong> turn-by-turn navigation. Prepare before that day.</p>
 <ol class="list-decimal pl-5 space-y-2 text-sm muted mb-4">
-<li><strong>Install an offline map app now</strong> — <em>Organic Maps</em> or <em>OsmAnd</em> (free). Open it on Wi‑Fi and download your state / region maps.</li>
-<li><strong>Screenshot or print</strong> your leave-early routes and a paper street map of your suburb.</li>
-<li><strong>Write on paper:</strong> meeting place, two exits from your street, state emergency number, neighbour names.</li>
-<li><strong>Open this site once on good signal</strong> so it can save offline on your phone.</li>
+<li><strong>Install Organic Maps or OsmAnd</strong> and download your state on Wi‑Fi.</li>
+<li><strong>Screenshot or print</strong> leave-early routes and a suburb street map.</li>
+<li><strong>Write on paper:</strong> meeting place, two exits, emergency numbers.</li>
+<li><strong>Open this site once</strong> so the briefing can save offline.</li>
 </ol>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
 <div class="map-box">
-<div class="label mb-2">Australia orientation (works offline)</div>
-<svg viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg" aria-label="Simple map of Australia with state labels">
-<rect width="400" height="360" fill="transparent"/>
-<path d="M95 95 L130 70 L175 55 L230 50 L280 60 L320 85 L345 120 L355 160 L350 200 L335 235 L300 260 L250 275 L200 280 L150 270 L115 245 L90 210 L80 170 L85 130 Z" fill="rgba(34,211,238,.12)" stroke="currentColor" stroke-width="1.5" opacity=".9"/>
+<div class="label mb-2">Australia orientation (offline)</div>
+<svg viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg" aria-label="Simple map of Australia">
+<path d="M95 95 L130 70 L175 55 L230 50 L280 60 L320 85 L345 120 L355 160 L350 200 L335 235 L300 260 L250 275 L200 280 L150 270 L115 245 L90 210 L80 170 L85 130 Z" fill="rgba(34,211,238,.12)" stroke="currentColor" stroke-width="1.5"/>
 <path d="M255 300 L275 295 L285 310 L270 325 L250 318 Z" fill="rgba(34,211,238,.12)" stroke="currentColor" stroke-width="1.2"/>
-<text x="200" y="40" text-anchor="middle" fill="currentColor" font-size="12" font-family="DM Sans,sans-serif">Australia — orientation only</text>
+<text x="200" y="40" text-anchor="middle" fill="currentColor" font-size="12">Orientation only — not for driving</text>
 <text x="200" y="165" text-anchor="middle" fill="currentColor" font-size="11" opacity=".85">NT</text>
 <text x="130" y="145" text-anchor="middle" fill="currentColor" font-size="11" opacity=".85">WA</text>
 <text x="210" y="210" text-anchor="middle" fill="currentColor" font-size="11" opacity=".85">SA</text>
@@ -110,43 +131,28 @@ body.light .map-box{background:rgba(15,23,42,.04)}
 <text x="280" y="210" text-anchor="middle" fill="currentColor" font-size="11" opacity=".85">NSW</text>
 <text x="255" y="245" text-anchor="middle" fill="currentColor" font-size="11" opacity=".85">VIC</text>
 <text x="268" y="335" text-anchor="middle" fill="currentColor" font-size="10" opacity=".85">TAS</text>
-<circle cx="300" cy="230" r="3" fill="#fb7185"/><text x="308" y="233" fill="currentColor" font-size="9">Sydney</text>
-<circle cx="275" cy="248" r="3" fill="#fb7185"/><text x="282" y="252" fill="currentColor" font-size="9">Melbourne</text>
-<circle cx="95" cy="195" r="3" fill="#fb7185"/><text x="102" y="198" fill="currentColor" font-size="9">Perth</text>
-<circle cx="305" cy="175" r="3" fill="#fb7185"/><text x="312" y="178" fill="currentColor" font-size="9">Brisbane</text>
-<circle cx="200" cy="230" r="3" fill="#fb7185"/><text x="208" y="233" fill="currentColor" font-size="9">Adelaide</text>
-<circle cx="210" cy="95" r="3" fill="#fb7185"/><text x="218" y="98" fill="currentColor" font-size="9">Darwin</text>
 </svg>
-<p class="text-xs muted mt-2">Not for driving. Use only to keep calm and orient. Real routes need offline map apps or paper maps.</p>
 </div>
 <div class="map-box">
 <div class="label mb-2">If you must leave with no phone maps</div>
 <ul class="text-sm muted space-y-2 list-disc pl-4">
-<li>Leave early in daylight when told — night + smoke + no maps is how people get trapped.</li>
-<li>Know <strong>two ways out</strong> of your street before summer.</li>
-<li>Drive to a named place you already know (town centre, relative, oval) — not a new GPS pin.</li>
-<li>Take paper: address of meeting point, medical needs, pet plan.</li>
-<li>Do not drive into smoke or floodwater to “check the app”.</li>
+<li>Leave early in daylight when told.</li>
+<li>Know two ways out of your street before summer.</li>
+<li>Drive to a place you already know — not a new GPS pin.</li>
+<li>Do not drive into smoke or floodwater.</li>
 </ul>
-<p class="text-xs muted mt-3">State fire apps still need signal for live warnings. Offline map apps only help with roads you already downloaded.</p>
 </div>
 </div>
 <div class="flex flex-wrap gap-2">
 <button type="button" onclick="window.print()" class="a11y-btn">Print offline card</button>
 <a class="a11y-btn" href="https://organicmaps.app/" target="_blank" rel="noopener">Organic Maps</a>
 <a class="a11y-btn" href="https://osmand.net/" target="_blank" rel="noopener">OsmAnd</a>
-<a class="a11y-btn" href="https://www.bom.gov.au/" target="_blank" rel="noopener">BOM</a>
 </div>
 <p class="text-xs muted mt-3" id="sw-status">Offline save: checking…</p>
 </section>
 <section class="panel rounded-3xl p-5 mb-6">
 <div class="label mb-2">Australia right now</div>
 <div id="au-now" class="space-y-3"></div>
-<div class="mt-4 flex flex-wrap gap-2">
-<a class="src-link text-sm" href="https://www.bom.gov.au/" target="_blank" rel="noopener">BOM warnings</a>
-<a class="src-link text-sm" href="https://www.bom.gov.au/climate/outlooks/" target="_blank" rel="noopener">BOM climate outlook</a>
-<a class="src-link text-sm" href="https://www.emergency.wa.gov.au/" target="_blank" rel="noopener">Emergency info (example WA)</a>
-</div>
 </section>
 <section class="panel panel-hot rounded-3xl p-5 mb-6">
 <div class="label mb-2">Doomsday Clock (global)</div>
@@ -162,7 +168,7 @@ body.light .map-box{background:rgba(15,23,42,.04)}
 <section class="mb-6">
 <div class="flex justify-between items-end mb-3">
 <h2 class="font-semibold text-lg">Biggest concerns</h2>
-<span class="text-xs muted">Tap any card</span>
+<span class="text-xs muted">Each card answers “Should I worry?”</span>
 </div>
 <div id="priority-list" class="space-y-3"></div>
 </section>
@@ -179,21 +185,21 @@ body.light .map-box{background:rgba(15,23,42,.04)}
 <section class="panel rounded-3xl p-5 mb-6">
 <div class="label mb-2">What the stages mean</div>
 <div class="grid grid-cols-2 gap-3 text-sm">
-<div class="rounded-2xl p-3" style="border:1px solid var(--border)"><span class="stage-monitoring px-2 py-0.5 rounded-full text-xs">Watching</span><p class="mt-2 muted">Background risk. Stay aware.</p></div>
-<div class="rounded-2xl p-3" style="border:1px solid var(--border)"><span class="stage-elevated px-2 py-0.5 rounded-full text-xs">Raised</span><p class="mt-2 muted">Above normal. Check local plans.</p></div>
-<div class="rounded-2xl p-3" style="border:1px solid var(--border)"><span class="stage-building px-2 py-0.5 rounded-full text-xs">Building</span><p class="mt-2 muted">Pressure is stacking. Prep now.</p></div>
-<div class="rounded-2xl p-3" style="border:1px solid var(--border)"><span class="stage-critical px-2 py-0.5 rounded-full text-xs">Serious</span><p class="mt-2 muted">High concern. Follow official advice.</p></div>
+<div class="rounded-2xl p-3" style="border:1px solid var(--border)"><span class="stage-monitoring px-2 py-0.5 rounded-full text-xs">Watching</span><p class="mt-2 muted">No special action / stay aware.</p></div>
+<div class="rounded-2xl p-3" style="border:1px solid var(--border)"><span class="stage-elevated px-2 py-0.5 rounded-full text-xs">Raised</span><p class="mt-2 muted">Stay aware. Check local plans.</p></div>
+<div class="rounded-2xl p-3" style="border:1px solid var(--border)"><span class="stage-building px-2 py-0.5 rounded-full text-xs">Building</span><p class="mt-2 muted">Prep this week.</p></div>
+<div class="rounded-2xl p-3" style="border:1px solid var(--border)"><span class="stage-critical px-2 py-0.5 rounded-full text-xs">Serious</span><p class="mt-2 muted">Follow official warnings now.</p></div>
 </div>
 </section>
 <section id="matrix" class="mb-8">
 <h2 class="text-xl font-bold mb-2">All topics</h2>
-<p class="text-sm mb-4 muted">Each one opens a short plain-English briefing.</p>
+<p class="text-sm mb-4 muted">Plain-English briefings with “Should I worry?” on every card.</p>
 <div id="category-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
 </section>
 <section class="panel rounded-3xl p-5 mb-8 no-print" style="border-color:rgba(251,191,36,.35)">
 <div class="label mb-2">Not in Australia?</div>
-<h2 class="font-semibold text-lg mb-2">Fork the main branch for your country</h2>
-<p class="text-sm leading-relaxed mb-3 muted">Copy the clean template on <strong>main</strong>, add local maps and offline notes for your places, and ship.</p>
+<h2 class="font-semibold text-lg mb-2">One person per country is enough to start</h2>
+<p class="text-sm leading-relaxed mb-3 muted">Fork the <strong>main</strong> branch template. Add local agencies, local history people recognise, offline map notes, and real leave-early advice. National agencies issue warnings — this project turns them into checkable, plain-language context so people prepare before the siren.</p>
 <a class="inline-block mt-1 px-4 py-2.5 rounded-xl text-sm font-medium brand" style="background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35)" href="https://github.com/brendohxd/Planetary-Live-Risk-Watch" target="_blank" rel="noopener">Open the GitHub repo →</a>
 </section>
 <footer class="text-center text-xs py-6 muted">Public awareness tool for Australia · Not an official warning system · Always follow BOM and your state emergency service</footer>
@@ -207,9 +213,9 @@ body.light .map-box{background:rgba(15,23,42,.04)}
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('./sw.js').then(function(reg){
+    navigator.serviceWorker.register('./sw.js').then(function(){
       var el=document.getElementById('sw-status');
-      if(el) el.textContent='Offline save: ready on this device (open the site once on Wi‑Fi so maps and briefing can cache).';
+      if(el) el.textContent='Offline save: ready (open once on Wi‑Fi to cache briefing).';
     }).catch(function(){
       var el=document.getElementById('sw-status');
       if(el) el.textContent='Offline save: not available in this browser.';
