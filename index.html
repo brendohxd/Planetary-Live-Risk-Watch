@@ -3,230 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earth Risk Watch</title>
+    <title>Earth Risk Watch — Planetary Risk Matrix</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .risk-low { background-color: #dcfce7; color: #166534; }
+        .risk-moderate { background-color: #fef9c3; color: #854d0e; }
+        .risk-high { background-color: #ffedd5; color: #9a3412; }
+        .risk-severe { background-color: #fee2e2; color: #991b1b; }
+        details summary { list-style: none; }
+        details summary::-webkit-details-marker { display: none; }
+    </style>
 </head>
 <body class="bg-slate-950 text-slate-200">
-    <nav class="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-screen-2xl mx-auto px-8 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-x-3">
-                <div class="w-9 h-9 bg-emerald-600 rounded-2xl flex items-center justify-center">
-                    <i class="fa-solid fa-globe text-white text-2xl"></i>
+    <div class="max-w-7xl mx-auto p-4 md:p-6">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-8">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold tracking-tight">Earth Risk Watch</h1>
+                <p class="text-slate-400 mt-1">Planetary Risk Matrix — Transparent global risk monitoring</p>
+            </div>
+            <div class="mt-4 md:mt-0 text-sm text-slate-500">
+                Data-driven • Multi-source • Conservative readings
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" id="summary-cards">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                <div class="text-sm text-slate-400">Overall Profile</div>
+                <div class="text-xl font-semibold mt-1" id="overall-profile">Loading…</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                <div class="text-sm text-slate-400">Top Concerns</div>
+                <ul class="mt-2 text-sm space-y-1" id="top-concerns"></ul>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                <div class="text-sm text-slate-400">Doomsday Clock</div>
+                <div class="text-4xl font-bold mt-1 tracking-tighter" id="doomsday-seconds">—</div>
+                <div class="text-xs text-slate-500" id="doomsday-note">seconds to midnight</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
+                <h2 class="font-semibold mb-3">Risk Radar</h2>
+                <div id="radar-chart" style="min-height: 420px;"></div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
+                <h2 class="font-semibold mb-3">Risk Scores</h2>
+                <div id="bar-chart" style="min-height: 420px;"></div>
+            </div>
+        </div>
+
+        <!-- Expandable Categories -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-8">
+            <h2 class="font-semibold mb-2">Detailed Category Breakdown</h2>
+            <p class="text-sm text-slate-400 mb-5">Tap any category to expand full metrics, justification, and preparation notes.</p>
+            <div class="space-y-3" id="category-list"></div>
+        </div>
+
+        <!-- Cascading + Prep -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
+                <h2 class="font-semibold mb-3">Cascading Risks</h2>
+                <p class="text-sm text-slate-300" id="cascading-notes">Loading…</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
+                <h2 class="font-semibold mb-3">Preparation Priorities</h2>
+                <div class="text-sm space-y-2" id="prep-notes">
+                    <p class="text-orange-400 font-medium">Critical</p>
+                    <p class="text-slate-300 text-sm">Focus on High categories first. Maintain household emergency kits and monitor official alerts.</p>
+                    <p class="text-yellow-400 font-medium mt-3">This Week</p>
+                    <p class="text-slate-300 text-sm">Review personal preparedness plans and local risk resources.</p>
                 </div>
-                <span class="font-display text-2xl font-semibold tracking-tighter">Earth Risk Watch</span>
-            </div>
-            <div class="flex items-center gap-x-6 text-sm">
-                <a href="#risks" class="hover:text-white transition-colors">Risk Matrix</a>
-                <button onclick="showLocationModal()" class="px-4 py-1.5 text-xs border border-slate-700 rounded-xl hover:bg-slate-900 flex items-center gap-x-2">
-                    <i class="fa-solid fa-map-marker-alt"></i>
-                    <span>Location &amp; Alerts</span>
-                </button>
-                <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs border border-slate-700 rounded-xl hover:bg-slate-900 flex items-center gap-x-2">
-                    <i class="fa-solid fa-adjust" id="theme-icon"></i>
-                </button>
             </div>
         </div>
-    </nav>
 
-    <div class="max-w-screen-2xl mx-auto px-8 pt-12 pb-8">
-        <h1 class="font-display text-6xl leading-none tracking-tighter font-semibold mb-4">Stay informed.<br><span class="text-emerald-400">Be prepared.</span></h1>
-    </div>
-
-    <div id="risks" class="max-w-screen-2xl mx-auto px-8 pb-12">
-        <div class="font-display text-3xl font-semibold tracking-tighter mb-6">Current Global Risk Profile</div>
-        
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8">
-            <canvas id="riskBar" height="380"></canvas>
-        </div>
-        
-        <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-    </div>
-
-    <div id="modal" onclick="if (event.target.id === 'modal') hideModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
-        <div onclick="event.stopImmediatePropagation()" class="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-8" id="modalContent"></div>
-    </div>
-
-    <div id="locationModal" onclick="if (event.target.id === 'locationModal') hideLocationModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
-        <div onclick="event.stopImmediatePropagation()" class="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-8">
-            <div class="flex justify-between items-center mb-6">
-                <div class="font-display text-xl font-semibold">Location &amp; Alerts</div>
-                <button onclick="hideLocationModal()" class="text-2xl">&times;</button>
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-sm mb-2">Your Location</label>
-                <div class="flex gap-x-2">
-                    <input id="locationInput" type="text" placeholder="City or Region" class="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-4 py-2 text-sm">
-                    <button onclick="detectLocation()" class="px-4 py-2 text-sm border border-slate-700 rounded-2xl hover:bg-slate-800">Detect</button>
-                </div>
-                <div id="currentLocation" class="text-xs text-emerald-400 mt-2"></div>
-            </div>
-
-            <div class="mb-8">
-                <label class="flex items-center gap-x-3 cursor-pointer">
-                    <input type="checkbox" id="notifyToggle" class="accent-emerald-600">
-                    <span class="text-sm">Notify me about relevant risks and warnings for my area</span>
-                </label>
-            </div>
-
-            <div class="flex gap-x-3">
-                <button onclick="saveLocationPreferences()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-sm font-semibold">Save Preferences</button>
-                <button onclick="hideLocationModal()" class="flex-1 py-2.5 border border-slate-700 rounded-2xl text-sm">Cancel</button>
-            </div>
-        </div>
+        <footer class="text-center text-xs text-slate-500 py-6">
+            Earth Risk Watch • Data from authoritative public sources • Conservative risk readings • 
+            <a href="https://github.com/brendohxd/Planetary-Live-Risk-Watch" class="text-blue-400 hover:underline">GitHub</a>
+        </footer>
     </div>
 
     <script>
-        let riskData = null;
-
         async function loadData() {
             try {
                 const res = await fetch('risk-data.json');
-                if (!res.ok) throw new Error('Failed to fetch data');
-                riskData = await res.json();
-                renderAll();
-            } catch (e) {
-                console.error(e);
-                document.body.innerHTML = '<div class="p-8"><h1 class="text-xl mb-4">Error loading data</h1><p>Please hard refresh the page (Ctrl/Cmd + Shift + R). If the problem persists, the data file may be temporarily unavailable.</p></div>';
+                if (!res.ok) throw new Error('Failed to fetch risk-data.json');
+                const data = await res.json();
+                renderDashboard(data);
+            } catch (err) {
+                console.error(err);
+                document.body.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center p-6 bg-slate-950 text-slate-200">
+                        <div class="max-w-md text-center">
+                            <h1 class="text-2xl font-bold mb-3">Error loading data</h1>
+                            <p class="text-slate-400 mb-4">Please hard refresh the page (Ctrl/Cmd + Shift + R). If the problem persists, the data file may be temporarily unavailable.</p>
+                            <p class="text-xs text-slate-500">Technical detail: ${err.message}</p>
+                        </div>
+                    </div>`;
             }
         }
 
-        function renderAll() {
-            const ctx = document.getElementById('riskBar');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: riskData.categories.map(c => c.name),
-                    datasets: [{
-                        data: riskData.categories.map(c => c.score),
-                        backgroundColor: riskData.categories.map(c => c.level === 'High' ? '#f59e0b' : c.level === 'Moderate' ? '#eab308' : '#10b981')
-                    }]
-                },
-                options: { indexAxis: 'y', scales: { x: { max: 3 } }, plugins: { legend: { display: false } } }
-            });
-
-            const grid = document.getElementById('category-grid');
-            grid.innerHTML = '';
-            
-            riskData.categories.forEach((cat, index) => {
-                const color = cat.level === 'High' ? 'orange' : cat.level === 'Moderate' ? 'yellow' : 'emerald';
-                const div = document.createElement('div');
-                div.className = 'risk-card bg-slate-900 border border-slate-700 rounded-3xl p-6 cursor-pointer';
-                
-                div.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div class="font-semibold">${cat.name}</div>
-                        <span class="risk-badge bg-${color}-500/20 text-${color}-400">${cat.level}</span>
-                    </div>
-                    <div class="mt-3 text-sm text-slate-300 line-clamp-3">${cat.metrics}</div>
-                    <div class="mt-4 text-xs text-emerald-400">Click for details →</div>
-                `;
-                
-                div.onclick = () => showCategoryModal(index);
-                grid.appendChild(div);
-            });
-        }
-
-        function showCategoryModal(index) {
-            const cat = riskData.categories[index];
-            const modal = document.getElementById('modal');
-            const content = document.getElementById('modalContent');
-            
-            let eventsHTML = '';
-            if (cat.recent_events && cat.recent_events.length > 0) {
-                eventsHTML = cat.recent_events.map(e => `
-                    <div class="mb-3 p-3 bg-slate-800 rounded-2xl">
-                        <div class="font-medium text-sm">${e.date}</div>
-                        <div class="text-sm mt-1">${e.description}</div>
-                        <div class="text-xs text-slate-400 mt-1">${e.impact}</div>
-                    </div>
-                `).join('');
-            }
-            
-            content.innerHTML = `
-                <div class="flex justify-between mb-6">
-                    <div>
-                        <div class="font-display text-2xl font-semibold">${cat.name}</div>
-                        <span class="risk-badge bg-yellow-500/20 text-yellow-400">${cat.level}</span>
-                    </div>
-                    <button onclick="hideModal()" class="text-3xl">&times;</button>
-                </div>
-
-                <div class="mb-6">
-                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">KEY METRICS</div>
-                    <div class="text-sm">${cat.metrics}</div>
-                </div>
-
-                <div class="mb-6">
-                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">RECENT EVENTS</div>
-                    <div class="text-sm">${eventsHTML || 'No major recent events recorded.'}</div>
-                </div>
-
-                <div class="mb-6">
-                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">CROSS-REFERENCES</div>
-                    <div class="text-sm">${cat.cross_references ? cat.cross_references.map(r => `${r.category}: ${r.connection}`).join('<br>') : 'None'}</div>
-                </div>
-
-                <div>
-                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">PREPARATION</div>
-                    <div class="text-sm">${cat.prep_priority}</div>
-                </div>
-            `;
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function hideModal() {
-            document.getElementById('modal').classList.add('hidden');
-            document.getElementById('modal').classList.remove('flex');
-        }
-
-        function showLocationModal() {
-            document.getElementById('locationModal').classList.remove('hidden');
-            document.getElementById('locationModal').classList.add('flex');
-        }
-
-        function hideLocationModal() {
-            document.getElementById('locationModal').classList.remove('flex');
-            document.getElementById('locationModal').classList.add('hidden');
-        }
-
-        function detectLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    document.getElementById('locationInput').value = `${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`;
-                });
-            }
-        }
-
-        function saveLocationPreferences() {
-            const location = document.getElementById('locationInput').value.trim();
-            const notify = document.getElementById('notifyToggle').checked;
-            localStorage.setItem('userPreferences', JSON.stringify({ location, notify }));
-            alert('Preferences saved.');
-            hideLocationModal();
-        }
-
-        function toggleTheme() {
-            const body = document.body;
-            const icon = document.getElementById('theme-icon');
-            
-            if (currentTheme === 'dark') {
-                body.classList.remove('bg-slate-950', 'text-slate-200');
-                body.classList.add('bg-slate-100', 'text-slate-900');
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-                currentTheme = 'light';
+        function renderDashboard(data) {
+            // Support both old structure (categories array) and newer dict-style
+            let categories = [];
+            if (Array.isArray(data.categories)) {
+                categories = data.categories;
             } else {
-                body.classList.remove('bg-slate-100', 'text-slate-900');
-                body.classList.add('bg-slate-950', 'text-slate-200');
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-                currentTheme = 'dark';
+                // Convert dict-style from generator
+                const keys = Object.keys(data).filter(k => !['Overall_Summary','Doomsday_Clock','Astronomical_Context'].includes(k));
+                categories = keys.map(k => ({
+                    name: k,
+                    level: data[k].level || 'Low',
+                    score: data[k].score || 0,
+                    metrics: data[k].metrics || '',
+                    justification: data[k].justification || '',
+                    trend: data[k].trend || 'stable',
+                    prep_priority: data[k].prep_priority || '',
+                    links: data[k].links || [],
+                    historic_note: data[k].historic_note || data[k].historic || ''
+                }));
             }
+
+            const overall = data.Overall_Summary || data.overall || {};
+            const doomsday = data.Doomsday_Clock || data.doomsday || {};
+
+            document.getElementById('overall-profile').textContent = overall.overall_risk_profile || overall.profile || 'See categories';
+            const concerns = overall.top_concerns || [];
+            document.getElementById('top-concerns').innerHTML = concerns.slice(0,4).map(c => `<li class="flex gap-2"><span class="text-orange-400">•</span>${c}</li>`).join('') || '<li class="text-slate-500">None flagged</li>';
+            document.getElementById('doomsday-seconds').textContent = doomsday.seconds_to_midnight || doomsday.seconds || '85';
+            document.getElementById('doomsday-note').textContent = `seconds to midnight • ${doomsday.last_set || 'Jan 2026'}`;
+            document.getElementById('cascading-notes').textContent = overall.cascading_notes || overall.cascading || 'No major cascading risks highlighted in this assessment.';
+
+            // Charts
+            const names = categories.map(c => c.name);
+            const scores = categories.map(c => c.score);
+            const colors = categories.map(c => {
+                if (c.level === 'Severe') return '#c0392b';
+                if (c.level === 'High') return '#e67e22';
+                if (c.level === 'Moderate') return '#f1c40f';
+                return '#2ecc71';
+            });
+
+            // Radar
+            Plotly.newPlot('radar-chart', [{
+                type: 'scatterpolar',
+                r: [...scores, scores[0]],
+                theta: [...names, names[0]],
+                fill: 'toself',
+                fillcolor: 'rgba(59,130,246,0.15)',
+                line: { color: '#94a3b8', width: 2 },
+                marker: { size: 8, color: colors }
+            }], {
+                polar: {
+                    radialaxis: { visible: true, range: [0, 3.3], tickvals: [0,1,2,3], ticktext: ['Low','Mod','High','Sev'], tickfont: { size: 10, color: '#94a3b8' }, gridcolor: '#334155' },
+                    angularaxis: { tickfont: { size: 9, color: '#e2e8f0' }, gridcolor: '#334155' },
+                    bgcolor: 'rgba(15,23,42,0.6)'
+                },
+                showlegend: false, height: 420, margin: { t: 40, b: 40, l: 50, r: 50 },
+                paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: { color: '#e2e8f0' }
+            }, { responsive: true, displayModeBar: false });
+
+            // Bar
+            Plotly.newPlot('bar-chart', [{
+                type: 'bar',
+                x: names,
+                y: scores,
+                marker: { color: colors },
+                text: categories.map(c => c.level),
+                textposition: 'outside',
+                textfont: { color: '#e2e8f0', size: 11 },
+                hovertemplate: '<b>%{x}</b><br>Score: %{y}/3<br>Level: %{text}<extra></extra>'
+            }], {
+                showlegend: false, height: 420,
+                margin: { t: 30, b: 110, l: 40, r: 20 },
+                paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: { color: '#e2e8f0' },
+                xaxis: { tickangle: -35, tickfont: { size: 10 }, gridcolor: '#1e293b' },
+                yaxis: { range: [0, 3.5], tickvals: [0,1,2,3], gridcolor: '#1e293b' },
+                bargap: 0.25
+            }, { responsive: true, displayModeBar: false });
+
+            // Expandable list
+            const list = document.getElementById('category-list');
+            list.innerHTML = categories.map(cat => {
+                const lvl = (cat.level || 'Low').toLowerCase();
+                const links = (cat.links || []).slice(0,3).map(l => `<a href="${l}" target="_blank" rel="noopener" class="text-blue-400 hover:underline text-xs">Source →</a>`).join(' ');
+                return `
+                <details class="group bg-slate-950/60 border border-slate-800 rounded-2xl overflow-hidden">
+                    <summary class="flex flex-wrap items-center gap-3 cursor-pointer p-4 hover:bg-slate-800/40 transition">
+                        <span class="font-medium flex-1 min-w-[160px]">${cat.name}</span>
+                        <span class="px-3 py-0.5 rounded-full text-xs font-medium risk-${lvl}">${cat.level}</span>
+                        <span class="font-mono text-sm text-slate-300">${cat.score}/3</span>
+                        <span class="text-xs text-slate-500 uppercase">${cat.trend || 'stable'}</span>
+                    </summary>
+                    <div class="px-4 pb-5 pt-1 border-t border-slate-800/80 text-sm space-y-3">
+                        <div>
+                            <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Current Metrics</div>
+                            <p class="text-slate-200">${cat.metrics || '—'}</p>
+                        </div>
+                        ${cat.justification ? `<div><div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Justification</div><p class="text-slate-300">${cat.justification}</p></div>` : ''}
+                        ${cat.historic_note ? `<div><div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Recent Historic Context</div><p class="text-slate-400">${cat.historic_note}</p></div>` : ''}
+                        <div>
+                            <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Preparation</div>
+                            <p class="text-slate-300">${cat.prep_priority || cat.prep || 'Standard monitoring.'}</p>
+                        </div>
+                        ${links ? `<div class="flex flex-wrap gap-3 pt-1">${links}</div>` : ''}
+                    </div>
+                </details>`;
+            }).join('');
         }
 
         window.onload = loadData;
