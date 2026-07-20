@@ -8,15 +8,42 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Inter', system_ui, sans-serif; }
-        .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 600; }
-        .risk-card { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .risk-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .font-display {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            font-weight: 600;
+        }
+        
+        .risk-card {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #0f172a;
+            border: 1px solid #334155;
+        }
+        
+        .risk-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+            border-color: #475569;
+        }
+        
+        .premium-shadow {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        
+        .section-header {
+            font-size: 1.35rem;
+            letter-spacing: -0.03em;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200">
     <nav class="border-b border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-screen-2xl mx-auto px-8 py-4 flex items-center justify-between">
+        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
             <div class="flex items-center gap-x-3">
                 <div class="w-9 h-9 bg-emerald-600 rounded-2xl flex items-center justify-center">
                     <i class="fa-solid fa-globe text-white text-2xl"></i>
@@ -24,30 +51,44 @@
                 <span class="font-display text-2xl font-semibold tracking-tighter">Earth Risk Watch</span>
             </div>
             
-            <div class="flex items-center gap-x-6 text-sm">
+            <div class="flex items-center gap-x-7 text-sm">
                 <a href="#dashboard" class="hover:text-white transition-colors">Dashboard</a>
                 <a href="#risks" class="hover:text-white transition-colors">Risk Matrix</a>
                 <a href="#cascading" class="hover:text-white transition-colors">Cascading Impacts</a>
                 <a href="#preparation" class="hover:text-white transition-colors">Preparation</a>
                 
-                <button onclick="showLocationModal()" class="px-4 py-1.5 text-xs border border-slate-700 rounded-xl hover:bg-slate-900 flex items-center gap-x-2">
-                    <i class="fa-solid fa-map-marker-alt"></i>
-                    <span>Location &amp; Alerts</span>
-                </button>
-                
-                <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs border border-slate-700 rounded-xl hover:bg-slate-900 flex items-center gap-x-2">
-                    <i class="fa-solid fa-adjust" id="theme-icon"></i>
-                </button>
+                <div class="flex items-center gap-x-3 pl-4 border-l border-slate-700">
+                    <button onclick="showLocationModal()" class="px-4 py-1.5 text-xs border border-slate-700 rounded-2xl hover:bg-slate-900 flex items-center gap-x-2 transition-colors">
+                        <i class="fa-solid fa-map-marker-alt"></i>
+                        <span>Location &amp; Alerts</span>
+                    </button>
+                    
+                    <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs border border-slate-700 rounded-2xl hover:bg-slate-900 flex items-center gap-x-2 transition-colors">
+                        <i class="fa-solid fa-adjust" id="theme-icon"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-screen-2xl mx-auto px-8 pt-12 pb-8">
-        <h1 class="font-display text-6xl leading-none tracking-tighter font-semibold mb-4">Stay informed.<br><span class="text-emerald-400">Be prepared.</span></h1>
+    <div class="max-w-screen-2xl mx-auto px-8 pt-16 pb-12">
+        <div class="max-w-2xl">
+            <div class="inline-flex items-center px-4 py-1.5 bg-slate-900 border border-slate-700 rounded-3xl mb-6 text-sm">
+                <span class="text-emerald-400">●</span>
+                <span class="ml-2 font-medium">Transparent • Data-driven • Preparation-focused</span>
+            </div>
+            
+            <h1 class="font-display text-6xl leading-none tracking-tighter font-semibold mb-4">
+                Stay informed.<br>
+                <span class="text-emerald-400">Be prepared.</span>
+            </h1>
+            
+            <p class="text-xl text-slate-400 max-w-md">Clear, evidence-based monitoring of planetary risks with event history, trends, and cross-references.</p>
+        </div>
     </div>
 
-    <div id="dashboard" class="max-w-screen-2xl mx-auto px-8 pb-10">
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-2xl">
+    <div id="dashboard" class="max-w-screen-2xl mx-auto px-8 pb-14">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-2xl premium-shadow">
             <div class="flex justify-between items-start mb-6">
                 <div>
                     <div class="text-emerald-400 text-xs font-semibold tracking-[1.5px]">SYMBOLIC INDICATOR</div>
@@ -62,7 +103,7 @@
         </div>
     </div>
 
-    <div id="risks" class="max-w-screen-2xl mx-auto px-8 pb-14">
+    <div id="risks" class="max-w-screen-2xl mx-auto px-8 pb-16">
         <div class="flex items-end justify-between mb-6">
             <div>
                 <div class="text-emerald-400 text-sm font-semibold tracking-[2px]">12-CATEGORY MATRIX</div>
@@ -70,7 +111,7 @@
             </div>
         </div>
         
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 mb-8 premium-shadow">
             <div class="font-semibold mb-4">Risk Scores by Category</div>
             <canvas id="riskBar" height="380"></canvas>
         </div>
@@ -84,8 +125,8 @@
             <div class="font-display text-4xl font-semibold tracking-tighter">Cascading Impacts &amp; Interconnections</div>
         </div>
         
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8">
-            <div class="text-sm text-slate-300 mb-4">Key relationships where one risk amplifies others.</div>
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8 premium-shadow">
+            <div class="text-sm text-slate-300 mb-6">Key relationships where one risk amplifies others, especially Infrastructure &amp; Financial Strain.</div>
             <div id="cascading-list" class="space-y-4"></div>
         </div>
     </div>
@@ -129,16 +170,11 @@
         let currentTheme = 'dark';
 
         async function loadData() {
-            try {
-                const res = await fetch('risk-data.json');
-                riskData = await res.json();
-                renderAll();
-                renderCascading();
-                loadSavedPreferences();
-            } catch (e) {
-                console.error('Failed to load data', e);
-                document.body.innerHTML = '<div class="p-8 text-red-400">Error loading risk data. Please refresh the page.</div>';
-            }
+            const res = await fetch('risk-data.json');
+            riskData = await res.json();
+            renderAll();
+            renderCascading();
+            loadSavedPreferences();
         }
 
         function renderAll() {
@@ -161,11 +197,10 @@
 
             const grid = document.getElementById('category-grid');
             grid.innerHTML = '';
-            
             riskData.categories.forEach((cat, index) => {
                 const color = cat.level === 'High' ? 'orange' : cat.level === 'Moderate' ? 'yellow' : 'emerald';
                 const div = document.createElement('div');
-                div.className = 'risk-card bg-slate-900 border border-slate-700 rounded-3xl p-6 cursor-pointer';
+                div.className = 'risk-card rounded-3xl p-6 cursor-pointer';
                 
                 div.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -245,23 +280,41 @@
                     </div>
                 </div>
 
-                <div class="mb-6">
-                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">KEY METRICS</div>
-                    <div class="text-sm">${cat.metrics}</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <div class="mb-6">
+                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">KEY METRICS &amp; CONTEXT</div>
+                            <div class="text-sm">${cat.metrics}</div>
+                            <div class="mt-3 text-sm text-slate-300">${cat.cumulative_context || ''}</div>
+                        </div>
+
+                        <div>
+                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">RECENT EVENTS</div>
+                            <div class="text-sm">${eventsHTML || '<span class="text-slate-400">No major recent events recorded.</span>'}</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="mb-6">
+                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">CROSS-REFERENCES</div>
+                            <div class="text-sm">${cat.cross_references ? cat.cross_references.map(r => `${r.category}: ${r.connection}`).join('<br>') : '<span class="text-slate-400">None</span>'}</div>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">SOURCES &amp; DISCREPANCIES</div>
+                            <div class="text-sm">${cat.sources_compared}</div>
+                            <div class="mt-2 text-xs text-emerald-400">${cat.discrepancies}</div>
+                        </div>
+
+                        <div>
+                            <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">CONSERVATIVE READING</div>
+                            <div class="bg-slate-800 p-4 rounded-2xl text-sm">${cat.conservative_reading}</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mb-6">
-                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">RECENT EVENTS</div>
-                    <div class="text-sm">${eventsHTML || 'No major recent events recorded.'}</div>
-                </div>
-
-                <div class="mb-6">
-                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">CROSS-REFERENCES</div>
-                    <div class="text-sm">${cat.cross_references ? cat.cross_references.map(r => `${r.category}: ${r.connection}`).join('<br>') : 'None'}</div>
-                </div>
-
-                <div>
-                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">PREPARATION</div>
+                <div class="mt-8 pt-6 border-t border-slate-700">
+                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">PREPARATION PRIORITY</div>
                     <div class="text-sm">${cat.prep_priority}</div>
                 </div>
             `;
@@ -311,7 +364,7 @@
         function saveLocationPreferences() {
             const location = document.getElementById('locationInput').value.trim();
             const notify = document.getElementById('notifyToggle').checked;
-            localStorage.setItem('userPreferences', JSON.stringify({ location: location, notify: notify }));
+            localStorage.setItem('userPreferences', JSON.stringify({ location, notify }));
             alert('Preferences saved.');
             hideLocationModal();
         }
