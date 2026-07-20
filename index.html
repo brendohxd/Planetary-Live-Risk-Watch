@@ -27,7 +27,7 @@
             <div class="flex items-center gap-x-6 text-sm">
                 <a href="#dashboard" class="hover:text-white transition-colors">Dashboard</a>
                 <a href="#risks" class="hover:text-white transition-colors">Risk Matrix</a>
-                <a href="#deep-dives" class="hover:text-white transition-colors">Deep Dives</a>
+                <a href="#cascading" class="hover:text-white transition-colors">Cascading Impacts</a>
                 <a href="#preparation" class="hover:text-white transition-colors">Preparation</a>
                 
                 <button onclick="showLocationModal()" class="px-4 py-1.5 text-xs border border-slate-700 rounded-xl hover:bg-slate-900 flex items-center gap-x-2">
@@ -78,7 +78,23 @@
         <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
 
-    <!-- Location & Alerts Modal -->
+    <!-- Cascading Impacts Section -->
+    <div id="cascading" class="max-w-screen-2xl mx-auto px-8 pb-16">
+        <div class="mb-6">
+            <div class="text-emerald-400 text-sm font-semibold tracking-[2px]">SYSTEMIC VIEW</div>
+            <div class="font-display text-4xl font-semibold tracking-tighter">Cascading Impacts &amp; Interconnections</div>
+        </div>
+        
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-8">
+            <div class="text-sm text-slate-300 mb-4">Key relationships where one risk amplifies others (especially Infrastructure &amp; Financial Strain). Data pulled from category cross-references.</div>
+            <div id="cascading-list" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <div id="modal" onclick="if (event.target.id === 'modal') hideModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+        <div onclick="event.stopImmediatePropagation()" class="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-8" id="modalContent"></div>
+    </div>
+
     <div id="locationModal" onclick="if (event.target.id === 'locationModal') hideLocationModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
         <div onclick="event.stopImmediatePropagation()" class="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-8">
             <div class="flex justify-between items-center mb-6">
@@ -100,7 +116,6 @@
                     <input type="checkbox" id="notifyToggle" class="accent-emerald-600">
                     <span class="text-sm">Notify me about relevant risks and warnings for my area</span>
                 </label>
-                <div class="text-xs text-slate-400 mt-2">You will receive alerts for significant events that may affect your location (feature in development for full app).</div>
             </div>
 
             <div class="flex gap-x-3">
@@ -108,10 +123,6 @@
                 <button onclick="hideLocationModal()" class="flex-1 py-2.5 border border-slate-700 rounded-2xl text-sm">Cancel</button>
             </div>
         </div>
-    </div>
-
-    <div id="modal" onclick="if (event.target.id === 'modal') hideModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
-        <div onclick="event.stopImmediatePropagation()" class="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-8" id="modalContent"></div>
     </div>
 
     <script>
@@ -122,6 +133,7 @@
             const res = await fetch('risk-data.json');
             riskData = await res.json();
             renderAll();
+            renderCascading();
             loadSavedPreferences();
         }
 
@@ -159,6 +171,44 @@
                 `;
                 div.onclick = () => showCategoryModal(index);
                 grid.appendChild(div);
+            });
+        }
+
+        function renderCascading() {
+            const container = document.getElementById('cascading-list');
+            container.innerHTML = '';
+            
+            const cascadingItems = [];
+            
+            riskData.categories.forEach(cat => {
+                if (cat.cross_references && cat.cross_references.length > 0) {
+                    cat.cross_references.forEach(ref => {
+                        cascadingItems.push({
+                            from: cat.name,
+                            to: ref.category,
+                            connection: ref.connection
+                        });
+                    });
+                }
+            });
+            
+            if (cascadingItems.length === 0) {
+                container.innerHTML = '<div class="text-sm text-slate-400">No major cascading relationships recorded in current data.</div>';
+                return;
+            }
+            
+            cascadingItems.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'p-4 bg-slate-800 rounded-2xl';
+                div.innerHTML = `
+                    <div class="flex items-center gap-x-2 text-sm">
+                        <span class="font-semibold text-emerald-400">${item.from}</span>
+                        <i class="fa-solid fa-arrow-right text-slate-500"></i>
+                        <span class="font-semibold">${item.to}</span>
+                    </div>
+                    <div class="text-sm text-slate-300 mt-2">${item.connection}</div>
+                `;
+                container.appendChild(div);
             });
         }
 
@@ -217,60 +267,36 @@
             document.getElementById('modal').classList.remove('flex');
         }
 
-        // Location & Alerts
         function showLocationModal() {
             const modal = document.getElementById('locationModal');
             const saved = JSON.parse(localStorage.getItem('userPreferences') || '{}');
             
-            if (saved.location) {
-                document.getElementById('locationInput').value = saved.location;
-                document.getElementById('currentLocation').innerHTML = `Current: ${saved.location}`;
-            }
-            if (saved.notify) {
-                document.getElementById('notifyToggle').checked = true;
-            }
+            if (saved.location) document.getElementById('locationInput').value = saved.location;
+            if (saved.notify) document.getElementById('notifyToggle').checked = true;
             
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         }
 
         function hideLocationModal() {
-            const modal = document.getElementById('locationModal');
-            modal.classList.remove('flex');
-            modal.classList.add('hidden');
+            document.getElementById('locationModal').classList.remove('flex');
+            document.getElementById('locationModal').classList.add('hidden');
         }
 
         function detectLocation() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    // For demo, we just use coordinates. In real app we would reverse geocode.
-                    const coords = `${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`;
-                    document.getElementById('locationInput').value = coords;
-                }, function() {
-                    alert('Unable to detect location. Please enter manually.');
-                });
-            } else {
-                alert('Geolocation is not supported by this browser.');
+                navigator.geolocation.getCurrentPosition(pos => {
+                    document.getElementById('locationInput').value = `${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`;
+                }, () => alert('Unable to detect location.'));
             }
         }
 
         function saveLocationPreferences() {
             const location = document.getElementById('locationInput').value.trim();
             const notify = document.getElementById('notifyToggle').checked;
-            
-            const prefs = { location: location, notify: notify };
-            localStorage.setItem('userPreferences', JSON.stringify(prefs));
-            
-            document.getElementById('currentLocation').innerHTML = location ? `Saved: ${location}` : '';
-            alert('Preferences saved. Full notifications will be available in the app version.');
+            localStorage.setItem('userPreferences', JSON.stringify({ location, notify }));
+            alert('Preferences saved.');
             hideLocationModal();
-        }
-
-        function loadSavedPreferences() {
-            const saved = JSON.parse(localStorage.getItem('userPreferences') || '{}');
-            if (saved.location) {
-                // Could show in navbar if desired
-            }
         }
 
         function toggleTheme() {
