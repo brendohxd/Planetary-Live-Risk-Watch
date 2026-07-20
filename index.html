@@ -1,1 +1,203 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Earth Risk Watch — Stay informed. Be prepared.</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  :root { --bg: #070b14; --panel: #0f172a; --border: #1e293b; --text: #e2e8f0; --muted: #94a3b8; --accent: #34d399; }
+  body { background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .panel { background: linear-gradient(180deg, #111827 0%, #0f172a 100%); border: 1px solid var(--border); }
+  .muted { color: var(--muted); }
+  .stage-monitoring { background: #064e3b; color: #6ee7b7; }
+  .stage-elevated { background: #713f12; color: #fde68a; }
+  .stage-building { background: #7c2d12; color: #fdba74; }
+  .stage-critical { background: #7f1d1d; color: #fca5a5; }
+  .level-low { color: #34d399; } .level-moderate { color: #fbbf24; } .level-high { color: #fb923c; } .level-severe { color: #f87171; }
+  .card-hover { transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
+  .card-hover:hover { transform: translateY(-2px); border-color: #334155; box-shadow: 0 10px 30px -12px rgba(0,0,0,.5); }
+  .detail-view { animation: slideIn .25s ease; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .progress-track { background: #1e293b; height: 6px; border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 999px; }
+  #radar-wrap { width: 100%; max-width: 520px; margin: 0 auto; overflow: hidden; }
+  #radar-chart { width: 100% !important; height: 340px !important; }
+  #orbital-svg { width: 100%; max-width: 520px; height: auto; display: block; margin: 0 auto; }
+  @media (max-width: 640px) { .hide-mobile { display: none; } #radar-chart { height: 300px !important; } }
+</style>
+</head>
+<body class="min-h-screen">
+  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-[#070b14]/90 backdrop-blur">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="#" onclick="showHome(); return false;" class="flex items-center gap-2.5 font-semibold tracking-tight">
+        <span class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400"><i class="fa-solid fa-earth-americas"></i></span>
+        Earth Risk Watch
+      </a>
+      <nav class="flex items-center gap-1 sm:gap-3 text-sm">
+        <a href="#matrix" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800/60 muted hover:text-white">All risks</a>
+        <a href="#space" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800/60 muted hover:text-white">Space context</a>
+        <a href="#prep" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800/60 muted hover:text-white hide-mobile">Prepare</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="app" class="max-w-6xl mx-auto px-4 pb-20">
+    <div id="home-view">
+      <section class="pt-8 sm:pt-12 pb-6">
+        <p class="text-emerald-400/90 text-sm font-medium mb-2">Transparent global risk monitoring</p>
+        <h1 class="text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1] max-w-3xl">Stay informed.<br><span class="text-emerald-400">Be prepared.</span></h1>
+        <p class="mt-4 text-slate-400 max-w-2xl text-base sm:text-lg leading-relaxed" id="hero-framing">Loading current assessment…</p>
+        <p class="mt-2 text-xs text-slate-500" id="last-updated"></p>
+      </section>
+
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-8">
+        <div class="lg:col-span-4 panel rounded-3xl p-5 sm:p-6">
+          <div class="text-xs uppercase tracking-widest text-slate-500 mb-3">Doomsday Clock</div>
+          <div class="flex items-end gap-3 mb-2">
+            <div class="text-5xl sm:text-6xl font-bold tracking-tighter text-rose-400" id="dd-seconds">85</div>
+            <div class="pb-2 text-sm text-slate-400 leading-tight">seconds<br>to midnight</div>
+          </div>
+          <div class="progress-track mb-3"><div class="progress-fill bg-gradient-to-r from-rose-600 via-orange-500 to-emerald-600" id="dd-bar" style="width:29%"></div></div>
+          <p class="text-sm text-slate-300 leading-relaxed" id="dd-context"></p>
+          <p class="text-xs text-slate-500 mt-3" id="dd-source"></p>
+          <button onclick="openCategory('Nuclear Risk')" class="mt-4 w-full text-left text-sm px-3 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/15 transition">
+            <span class="text-rose-300 font-medium">Primary driver: Nuclear Risk</span>
+            <span class="block text-xs text-slate-400 mt-0.5">Open full briefing →</span>
+          </button>
+        </div>
+        <div class="lg:col-span-8 panel rounded-3xl p-5 sm:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-xs uppercase tracking-widest text-slate-500">Highest priority right now</div>
+            <div class="text-xs text-slate-500">Tap for full briefing</div>
+          </div>
+          <div id="priority-list" class="space-y-3"></div>
+        </div>
+      </section>
+
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+        <div class="panel rounded-3xl p-4 sm:p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-semibold">Risk radar</h2>
+            <span class="text-xs text-slate-500">Outer = higher</span>
+          </div>
+          <div id="radar-wrap"><div id="radar-chart"></div></div>
+        </div>
+        <div class="panel rounded-3xl p-4 sm:p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-semibold">Scores</h2>
+            <span class="text-xs text-slate-500">0 Low · 3 Severe</span>
+          </div>
+          <div id="score-bars" class="space-y-2.5 max-h-[340px] overflow-y-auto pr-1"></div>
+        </div>
+      </section>
+
+      <section id="space" class="panel rounded-3xl p-4 sm:p-6 mb-8">
+        <div class="mb-3">
+          <h2 class="font-semibold text-lg">Solar system context</h2>
+          <p class="text-sm text-slate-400 mt-1">Approximate orbits for awareness. Related risks: Solar & Space Weather, NEOs, Geomagnetic Field.</p>
+        </div>
+        <div class="flex justify-center">
+          <svg id="orbital-svg" viewBox="0 0 440 440" xmlns="http://www.w3.org/2000/svg" aria-label="Solar system orbital diagram">
+            <rect width="440" height="440" fill="#0b1220" rx="16"/>
+            <circle cx="220" cy="220" r="28" fill="none" stroke="#1e293b" stroke-width="1" stroke-dasharray="2 3"/>
+            <circle cx="220" cy="220" r="48" fill="none" stroke="#1e293b" stroke-width="1" stroke-dasharray="2 3"/>
+            <circle cx="220" cy="220" r="68" fill="none" stroke="#1e293b" stroke-width="1" stroke-dasharray="2 3"/>
+            <circle cx="220" cy="220" r="92" fill="none" stroke="#1e293b" stroke-width="1" stroke-dasharray="2 3"/>
+            <circle cx="220" cy="220" r="130" fill="none" stroke="#1e293b" stroke-width="1" stroke-dasharray="2 3"/>
+            <circle cx="220" cy="220" r="165" fill="none" stroke="#1e293b" stroke-width="1" stroke-dasharray="2 3"/>
+            <circle cx="220" cy="220" r="195" fill="none" stroke="#f472b6" stroke-width="1.5" stroke-dasharray="6 5" opacity="0.7"/>
+            <text x="220" y="28" text-anchor="middle" fill="#f9a8d4" font-size="11" font-family="system-ui">Planet 9 scale (hypothesized · not confirmed)</text>
+            <circle cx="220" cy="220" r="12" fill="#f59e0b"/>
+            <text x="220" y="224" text-anchor="middle" fill="#0f172a" font-size="8" font-weight="700" font-family="system-ui">Sun</text>
+            <circle cx="244" cy="206" r="3.5" fill="#94a3b8"/><text x="252" y="204" fill="#94a3b8" font-size="9" font-family="system-ui">Mer</text>
+            <circle cx="178" cy="190" r="5" fill="#f87171"/><text x="158" y="188" fill="#fca5a5" font-size="9" font-family="system-ui">Ven</text>
+            <circle cx="268" cy="250" r="5.5" fill="#38bdf8" stroke="#e2e8f0" stroke-width="1"/><text x="276" y="254" fill="#7dd3fc" font-size="9" font-family="system-ui">Earth</text>
+            <circle cx="160" cy="270" r="4.5" fill="#fb923c"/><text x="140" y="274" fill="#fdba74" font-size="9" font-family="system-ui">Mars</text>
+            <circle cx="310" cy="160" r="9" fill="#facc15"/><text x="322" y="164" fill="#fde047" font-size="9" font-family="system-ui">Jupiter</text>
+            <circle cx="100" cy="140" r="7.5" fill="#c084fc"/><ellipse cx="100" cy="140" rx="14" ry="4" fill="none" stroke="#c084fc" stroke-width="1" opacity="0.7"/><text x="70" y="136" fill="#d8b4fe" font-size="9" font-family="system-ui">Saturn</text>
+            <circle cx="340" cy="300" r="6" fill="#22d3ee"/><text x="348" y="304" fill="#67e8f9" font-size="9" font-family="system-ui">Uranus</text>
+            <circle cx="80" cy="320" r="6" fill="#60a5fa"/><text x="48" y="324" fill="#93c5fd" font-size="9" font-family="system-ui">Neptune</text>
+            <text x="220" y="420" text-anchor="middle" fill="#64748b" font-size="9" font-family="system-ui">Illustrative only · positions approximate · no confirmed rogue-planet location</text>
+          </svg>
+        </div>
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+          <div class="rounded-xl bg-slate-900/50 border border-slate-800 p-3">
+            <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Solar & space weather</div>
+            <p class="text-slate-400">Solar Cycle activity can disturb satellites and grids.</p>
+            <button onclick="openCategory('Solar & Space Weather')" class="text-emerald-400 text-xs mt-2 hover:underline">Open →</button>
+          </div>
+          <div class="rounded-xl bg-slate-900/50 border border-slate-800 p-3">
+            <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Near-Earth Objects</div>
+            <p class="text-slate-400">No significant near-term impact threat. Continuous survey monitoring.</p>
+            <button onclick="openCategory('Near-Earth Objects (NEOs)')" class="text-emerald-400 text-xs mt-2 hover:underline">Open →</button>
+          </div>
+          <div class="rounded-xl bg-slate-900/50 border border-slate-800 p-3">
+            <div class="text-xs text-pink-300/90 uppercase tracking-wide mb-1">Planet 9 (hypothetical)</div>
+            <p class="text-slate-400">Pink ring = illustrative distant scale only. Not a detection. No confirmed position or proven effect on known planets/Moon.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="matrix" class="mb-10">
+        <div class="mb-4">
+          <h2 class="text-2xl font-bold tracking-tight">All risk categories</h2>
+          <p class="text-sm text-slate-400 mt-1">Stage, trend, and why it matters. Open any for deeper history and sources.</p>
+        </div>
+        <div id="category-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+      </section>
+
+      <section class="panel rounded-3xl p-5 sm:p-6 mb-8">
+        <h2 class="font-semibold text-lg mb-3">How to read the stages</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-3"><span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium stage-monitoring mb-2">Monitoring</span><p class="text-slate-400">Background risk. Normal preparedness is enough.</p></div>
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-3"><span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium stage-elevated mb-2">Elevated</span><p class="text-slate-400">Above normal or regionally important. Stay aware.</p></div>
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-3"><span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium stage-building mb-2">Building</span><p class="text-slate-400">Worsening trend or accumulating pressure. Plan ahead.</p></div>
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-3"><span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium stage-critical mb-2">Critical</span><p class="text-slate-400">High/severe concern with serious implications.</p></div>
+        </div>
+      </section>
+
+      <section id="prep" class="panel rounded-3xl p-5 sm:p-6 mb-8">
+        <h2 class="font-semibold text-lg mb-3">Simple preparation priorities</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div><div class="text-emerald-400 font-medium mb-1">This week</div><ul class="text-slate-400 space-y-1 list-disc list-inside"><li>Know local alert systems</li><li>Basic kit: water, food, meds, light, radio</li><li>Note evacuation routes</li></ul></div>
+          <div><div class="text-amber-400 font-medium mb-1">This month</div><ul class="text-slate-400 space-y-1 list-disc list-inside"><li>1–2 week household buffer</li><li>Review flood/fire insurance</li><li>Follow official sources directly</li></ul></div>
+          <div><div class="text-sky-400 font-medium mb-1">Ongoing</div><ul class="text-slate-400 space-y-1 list-disc list-inside"><li>Track Building / High categories</li><li>Reduce single points of failure</li><li>Revisit after major events</li></ul></div>
+        </div>
+      </section>
+
+      <footer class="text-center text-xs text-slate-600 py-6">Public awareness tool · Multi-source · Conservative readings · Not an official warning system<br>Always follow local emergency authorities.</footer>
+    </div>
+
+    <div id="detail-view" class="hidden detail-view pt-6">
+      <button onclick="showHome()" class="text-sm text-slate-400 hover:text-white mb-4 inline-flex items-center gap-2"><i class="fa-solid fa-arrow-left"></i> Back to overview</button>
+      <div id="detail-content"></div>
+    </div>
+  </main>
+
+<script>
+let riskData = null;
+const STAGE_MAP = {
+  'Low': { stage: 'Monitoring', cls: 'stage-monitoring', why: 'Background conditions. Stay generally prepared.' },
+  'Moderate': { stage: 'Elevated', cls: 'stage-elevated', why: 'Above normal or regionally important — worth active awareness.' },
+  'High': { stage: 'Building', cls: 'stage-building', why: 'Significant pressure or worsening trend. Plan ahead.' },
+  'Severe': { stage: 'Critical', cls: 'stage-critical', why: 'Serious systemic or near-term concern.' }
+};
+const ICONS = {'Seismic Activity':'fa-house-crack','Volcanic Activity':'fa-mountain','Solar & Space Weather':'fa-sun','Ocean Temperatures & Marine Heatwaves':'fa-water','Sea Level Rise & Coastal Extremes':'fa-water','Weather Extremes, Drought & Heat Stress':'fa-temperature-high','Wildfire Activity & Air Quality':'fa-fire','Military Conflict & Escalation Risks':'fa-shield-halved','Near-Earth Objects (NEOs)':'fa-meteor','Geomagnetic Field Stability & Core Dynamics':'fa-magnet','Infrastructure & Financial Strain':'fa-building-columns','Nuclear Risk':'fa-radiation'};
+const SHORT = {'Seismic Activity':'Seismic','Volcanic Activity':'Volcanic','Solar & Space Weather':'Solar','Ocean Temperatures & Marine Heatwaves':'Ocean heat','Sea Level Rise & Coastal Extremes':'Sea level','Weather Extremes, Drought & Heat Stress':'Weather','Wildfire Activity & Air Quality':'Wildfire','Military Conflict & Escalation Risks':'Conflict','Near-Earth Objects (NEOs)':'NEOs','Geomagnetic Field Stability & Core Dynamics':'Geomagnetic','Infrastructure & Financial Strain':'Infra/Finance','Nuclear Risk':'Nuclear'};
+function stageInfo(level){return STAGE_MAP[level]||STAGE_MAP['Moderate'];}
+function levelClass(level){return 'level-'+(level||'moderate').toLowerCase();}
+function barColor(level){if(level==='Severe')return'#f87171';if(level==='High')return'#fb923c';if(level==='Moderate')return'#fbbf24';return'#34d399';}
+async function loadData(){try{const res=await fetch('risk-data.json',{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);riskData=await res.json();renderHome();const m=(location.hash||'').match(/risk=([^&]+)/);if(m)openCategory(decodeURIComponent(m[1]));}catch(e){document.getElementById('app').innerHTML=`<div class="py-20 text-center"><h1 class="text-xl font-semibold mb-2">Could not load data</h1><p class="text-slate-400 mb-4">Hard-refresh the page.</p><p class="text-xs text-slate-600">${e.message}</p></div>`;}}
+function plainWhy(c){return c.conservative_reading||c.metrics||'';}
+function renderHome(){const dc=riskData.doomsday_clock||{};const overall=riskData.overall_summary||{};document.getElementById('hero-framing').textContent=overall.framing||'';document.getElementById('last-updated').textContent='Assessment date: '+(riskData.date||'—')+(riskData.last_updated?' · Updated '+riskData.last_updated:'');document.getElementById('dd-seconds').textContent=dc.seconds_to_midnight??'—';document.getElementById('dd-context').textContent=dc.context||'';document.getElementById('dd-source').textContent=(dc.source||'')+(dc.as_of?' · set '+dc.as_of:'');const secs=dc.seconds_to_midnight??85;document.getElementById('dd-bar').style.width=Math.max(8,Math.min(100,100-(secs/120)*100))+'%';const cats=[...riskData.categories].sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));const top=cats.filter(c=>c.score>=2).concat(cats.filter(c=>c.score<2)).slice(0,4);document.getElementById('priority-list').innerHTML=top.map(c=>{const st=stageInfo(c.level);const icon=ICONS[c.name]||'fa-circle-exclamation';return `<button onclick="openCategory('${c.name.replace(/'/g,"\\'")}')" class="w-full text-left card-hover panel rounded-2xl p-4 border border-slate-800 flex gap-3 items-start"><div class="w-10 h-10 rounded-xl bg-slate-800/80 flex items-center justify-center text-slate-300 shrink-0"><i class="fa-solid ${icon}"></i></div><div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2 mb-1"><span class="font-semibold">${c.name}</span><span class="px-2 py-0.5 rounded-full text-[11px] font-medium ${st.cls}">${st.stage}</span></div><p class="text-sm text-slate-400 line-clamp-2">${plainWhy(c)}</p></div><i class="fa-solid fa-chevron-right text-slate-600 mt-1"></i></button>`;}).join('');document.getElementById('score-bars').innerHTML=cats.map(c=>{const pct=Math.max(4,(c.score/3)*100);return `<button onclick="openCategory('${c.name.replace(/'/g,"\\'")}')" class="w-full text-left group"><div class="flex items-center justify-between gap-2 mb-1"><span class="text-sm text-slate-300 group-hover:text-white truncate">${c.name}</span><span class="text-xs shrink-0 ${levelClass(c.level)}">${c.level} · ${c.score}/3</span></div><div class="h-2 rounded-full bg-slate-800 overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:${barColor(c.level)}"></div></div></button>`;}).join('');document.getElementById('category-grid').innerHTML=cats.map(c=>{const st=stageInfo(c.level);const icon=ICONS[c.name]||'fa-circle';const isNuclear=c.name==='Nuclear Risk';return `<button onclick="openCategory('${c.name.replace(/'/g,"\\'")}')" class="text-left card-hover panel rounded-2xl p-4 border ${isNuclear?'border-rose-500/40 ring-1 ring-rose-500/20':'border-slate-800'}"><div class="flex items-start justify-between gap-2 mb-3"><div class="w-9 h-9 rounded-lg bg-slate-800/80 flex items-center justify-center text-slate-300"><i class="fa-solid ${icon}"></i></div><span class="px-2 py-0.5 rounded-full text-[11px] font-medium ${st.cls}">${st.stage}</span></div><div class="font-semibold leading-snug mb-1">${c.name}${isNuclear?' <span class="text-[10px] text-rose-400 font-normal">· Doomsday driver</span>':''}</div><div class="text-xs text-slate-500 mb-2">Trend: ${c.trend||'n/a'} · Score ${c.score}/3</div><p class="text-sm text-slate-400 line-clamp-3">${plainWhy(c)}</p><div class="mt-3 text-xs text-emerald-400/90">Open briefing →</div></button>`;}).join('');renderRadar(cats);}
+function renderRadar(cats){const labels=cats.map(c=>SHORT[c.name]||c.name.slice(0,10));const scores=cats.map(c=>c.score);const colors=cats.map(c=>barColor(c.level));Plotly.newPlot('radar-chart',[{type:'scatterpolar',r:[...scores,scores[0]],theta:[...labels,labels[0]],fill:'toself',fillcolor:'rgba(52,211,153,0.10)',line:{color:'#64748b',width:2},marker:{size:7,color:colors},hovertemplate:'<b>%{theta}</b><br>Score %{r}/3<extra></extra>'}],{polar:{radialaxis:{range:[0,3.25],tickvals:[0,1,2,3],ticktext:['L','M','H','S'],tickfont:{size:10,color:'#94a3b8'},gridcolor:'#1e293b',linecolor:'#334155'},angularaxis:{tickfont:{size:10,color:'#cbd5e1'},gridcolor:'#1e293b',rotation:90,direction:'clockwise'},bgcolor:'rgba(15,23,42,0.45)'},showlegend:false,height:340,margin:{t:36,b:36,l:48,r:48},paper_bgcolor:'transparent',plot_bgcolor:'transparent',font:{color:'#e2e8f0',size:11}},{responsive:true,displayModeBar:false});}
+function openCategory(name){const cat=riskData.categories.find(c=>c.name===name);if(!cat)return;location.hash='risk='+encodeURIComponent(name);document.getElementById('home-view').classList.add('hidden');document.getElementById('detail-view').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});const st=stageInfo(cat.level);const icon=ICONS[cat.name]||'fa-circle';const isNuclear=cat.name==='Nuclear Risk';let events='<p class="text-slate-500 text-sm">No recent events listed.</p>';if(cat.recent_events&&cat.recent_events.length){events=cat.recent_events.map(e=>`<div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-4 mb-3"><div class="text-xs text-emerald-400/90 font-medium mb-1">${e.date}</div><div class="font-medium text-sm mb-1">${e.description}</div><div class="text-sm text-slate-400">${e.impact||''}</div>${e.sources?`<div class="text-xs text-slate-500 mt-2">Sources: ${e.sources.join(' · ')}</div>`:''}</div>`).join('');}let cross='';if(cat.cross_references&&cat.cross_references.length){cross=`<div class="mt-8"><h3 class="text-sm uppercase tracking-widest text-slate-500 mb-3">How this connects to other risks</h3><div class="space-y-2">${cat.cross_references.map(r=>`<div class="rounded-xl border border-slate-800 p-3 text-sm"><button onclick="openCategory('${r.category.replace(/'/g,"\\'")}')" class="font-medium text-emerald-400 hover:underline">${r.category}</button><p class="text-slate-400 mt-1">${r.connection}</p></div>`).join('')}</div></div>`;}document.getElementById('detail-content').innerHTML=`<div class="mb-6"><div class="flex items-center gap-3 mb-3"><div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-xl text-slate-300"><i class="fa-solid ${icon}"></i></div><div><div class="flex flex-wrap items-center gap-2"><h1 class="text-2xl sm:text-3xl font-bold tracking-tight">${cat.name}</h1>${isNuclear?'<span class="text-xs px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30">Doomsday Clock driver</span>':''}</div><div class="flex flex-wrap items-center gap-2 mt-1 text-sm"><span class="px-2.5 py-0.5 rounded-full text-xs font-medium ${st.cls}">${st.stage}</span><span class="${levelClass(cat.level)} font-medium">${cat.level}</span><span class="text-slate-500">· Score ${cat.score}/3 · ${cat.trend||'n/a'}</span></div></div></div></div><div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8"><div class="panel rounded-2xl p-4"><div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Current stage</div><div class="font-semibold">${st.stage}</div><p class="text-sm text-slate-400 mt-1">${st.why}</p></div><div class="panel rounded-2xl p-4"><div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Why it matters</div><p class="text-sm text-slate-300 leading-relaxed">${plainWhy(cat)}</p></div><div class="panel rounded-2xl p-4"><div class="text-xs text-slate-500 uppercase tracking-wide mb-1">What you can do</div><p class="text-sm text-slate-300 leading-relaxed">${cat.prep_priority||'Follow official guidance and maintain basic readiness.'}</p></div></div><div class="panel rounded-3xl p-5 sm:p-6 mb-6"><h2 class="font-semibold text-lg mb-2">Current metrics</h2><p class="text-slate-300 leading-relaxed">${cat.metrics||'—'}</p></div><div class="panel rounded-3xl p-5 sm:p-6 mb-6"><h2 class="font-semibold text-lg mb-2">Cumulative & historic context</h2><p class="text-slate-300 leading-relaxed mb-4">${cat.cumulative_context||'—'}</p><h3 class="text-sm uppercase tracking-widest text-slate-500 mb-3">Recent findings</h3>${events}</div><div class="panel rounded-3xl p-5 sm:p-6 mb-6"><h2 class="font-semibold text-lg mb-3">Sources & confidence</h2><div class="space-y-3 text-sm"><div><div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Sources compared</div><p class="text-slate-300">${cat.sources_compared||'—'}</p></div><div><div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Discrepancies</div><p class="text-slate-400">${cat.discrepancies||'None noted.'}</p></div><div><div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Conservative reading</div><p class="text-slate-300">${cat.conservative_reading||'—'}</p></div></div></div>${cross}<div class="mt-10 mb-6"><button onclick="showHome()" class="px-4 py-2.5 rounded-xl border border-slate-700 text-sm hover:bg-slate-800/60">← Back to all risks</button></div>`;}
+function showHome(){location.hash='';document.getElementById('detail-view').classList.add('hidden');document.getElementById('home-view').classList.remove('hidden');}
+window.addEventListener('hashchange',()=>{const m=(location.hash||'').match(/risk=([^&]+)/);if(m&&riskData)openCategory(decodeURIComponent(m[1]));else showHome();});
+window.onload=loadData;
+</script>
+</body>
+</html>
